@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bx.gis.mapper.TestHelloMapper">
+    <select id="queryDemo" resultType="java.util.Map">
+        SELECT
+          *
+        FROM
+          bx_region
+    </select>
+
+    <!-- 添加 -->
+    <insert id="addSceneryInfo" parameterType="com.bx.gis.entity.BxCommodityCommon">
+      INSERT INTO
+        scenery_demo(
+          com_name,com_duplex
+        ) VALUE (
+          #{com_name},#{com_duplex}
+        )
+    </insert>
+
+
+</mapper>

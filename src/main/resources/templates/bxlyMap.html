@@ -1,0 +1,1083 @@
+<!--用于声明改文件为HTML5文件-->
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+    <style type="text/css">
+        body, html, #bx_bdmap, #bx_gdmap {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            position: absolute !important;
+            font-family: "微软雅黑";
+        }
+
+        #bx_bdmap {
+            float: right;
+            margin-top: 45px;
+        }
+
+        #tog:hover {
+            color: #6BFFF3;
+        }
+
+        #tog {
+            color: #3997FF;
+            animation: myfirst 5s;
+            -moz-animation: myfirst 5s; /* Firefox */
+            -webkit-animation: myfirst 5s; /* Safari and Chrome */
+            -o-animation: myfirst 5s; /* Opera */
+        }
+
+        /*搜索提示框样式 start*/
+        .ui-autocomplete {
+            max-height: 140px;
+            overflow-y: auto;
+            /* 防止水平滚动条 */
+            overflow-x: hidden;
+        }
+
+        /* IE 6 不支持 max-height
+         * 我们使用 height 代替，但是这会强制菜单总是显示为那个高度
+         */
+        * html .ui-autocomplete {
+            height: 100px;
+        }
+
+        /*搜索提示框样式 end*/
+
+        /*搜索按钮样式 start*/
+        #fix_scenery_bt {
+            color: white;
+        }
+
+        /*搜索按钮样式 end*/
+
+        /*保存按钮样式 start*/
+        #submitSceneryCollectInfo {
+            color: white;
+        }
+
+        /*保存按钮样式 end*/
+
+        /*景区弹出框按钮样式 start*/
+        .scenery-box-bt {
+            text-align: center;
+            margin-top: 110px;
+            position: fixed;
+            margin-left: 140px;
+        }
+
+        /*景区弹出框按钮样式 end*/
+        @keyframes myfirst {
+            0% {
+                color: #42A1FF;
+            }
+            25% {
+                color: yellow;
+            }
+            50% {
+                color: blue;
+            }
+            100% {
+                color: green;
+            }
+        }
+
+        @-moz-keyframes myfirst /* Firefox */
+        {
+            0% {
+                color: #42A1FF;
+            }
+            25% {
+                color: yellow;
+            }
+            50% {
+                color: blue;
+            }
+            100% {
+                color: green;
+            }
+        }
+
+        @-webkit-keyframes myfirst /* Safari and Chrome */
+        {
+            0% {
+                color: #42A1FF;
+            }
+            25% {
+                color: yellow;
+            }
+            50% {
+                color: blue;
+            }
+            100% {
+                color: green;
+            }
+        }
+
+        @-o-keyframes myfirst /* Opera */
+        {
+            0% {
+                background: #42A1FF;
+            }
+            25% {
+                background: yellow;
+            }
+            50% {
+                background: blue;
+            }
+            100% {
+                background: green;
+            }
+        }
+
+        .amap-rotateRight-active {
+            transform-origin: 50% 50%;
+        / / 设置旋转中心 transform: rotate(45 deg);
+        / / 设置旋转角度，单位deg为度的意思，正数为顺时针旋转，负数为逆时针旋转
+        }
+
+        .amap-rotateLeft-active {
+            transform-origin: 50% 50%;
+        / / 设置旋转中心 transform: rotate(- 45 deg);
+        }
+
+        /*地图infoWindow样式 Start*/
+        .anchorBL {
+            display: none;
+        }
+
+        .BMap_bubble_title {
+            color: black;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .BMap_pop div:nth-child(1) {
+            border-radius: 9px 0 0 0;
+        }
+
+        .BMap_pop div:nth-child(3) div {
+            border-radius: 9px;
+        }
+
+        .BMap_pop div:nth-child(5) {
+            border-radius: 0 0 0 9px;
+        }
+
+        .BMap_pop div:nth-child(5) div {
+            border-radius: 9px;
+        }
+
+        .BMap_pop div:nth-child(7) {
+            border-radius: 0 0 9px 0;
+        }
+
+        .BMap_pop div:nth-child(7) div {
+            border-radius: 9px;
+        }
+
+        /*地图infoWindow样式 End*/
+
+        /*菜单栏样式 Start*/
+        #bx_title {
+            float: left;
+            background-color: #d6d1d1;
+            border-bottom: #2b2b2b;
+            height: 100%;
+            width: 15%;
+        }
+
+        #bx_bannar {
+            text-align: left;
+            padding: 15px;
+            font-family: "Microsoft YaHei UI";
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #2b2b2b;
+            color: #cfcfcf;
+        }
+
+        #bx_bannar > a {
+            float: right;
+            text-decoration: none;
+            color: #cfcfcf;
+            font-size: 14px;
+        }
+
+        #bx_bannar > a:hover {
+            font-size: 16px;
+            color: #0585bb;
+        }
+
+        #bx_title > ul {
+            text-align: center;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #bx_title > ul > li {
+            list-style: none;
+            padding: 7px;
+            border: 1px solid #c5c5c5;
+        }
+
+        #bx_title > ul > li > a {
+            color: #0968bb;
+            text-decoration: blink;
+            font-family: "Microsoft YaHei UI";
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        #bx_title > ul > li:hover {
+            background-color: #00b7ee;
+        }
+
+        #bx_title > ul > li:active {
+            color: #0c29bb;
+            background: #00b7ee;
+            margin: 3px;
+        }
+
+        #bx_title > ul > li > a:hover {
+            color: #0809bb;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .bx_li_click {
+            background-color: #00b7ee;
+            overflow: hidden;
+        }
+
+        #bx_content {
+            float: left;
+            padding: 10px;
+        }
+
+        .hide_and_show {
+            display: none
+        }
+
+        /*菜单栏样式 End*/
+        .change_map {
+            font-size: 18px;
+            margin-left: 990px;
+            margin-bottom: 10px;
+            position: absolute;
+        }
+
+        /*用户表格样式 Start*/
+        #bx_user_manage {
+            text-align: center;
+        }
+
+        #bxUserManageTable {
+            width: 80%;
+            margin: auto;
+            border: 1px solid darkgrey;
+        }
+
+        #bxUserManageTable > thead > tr {
+            width: 85%;
+            margin: 15px;
+            border: 1px solid darkgrey;
+            height: 40px;
+            font-size: 16px;
+        }
+
+        #bxUserManageTable table {
+            width: 100%;
+            margin: 15px 0
+        }
+
+        #bxUserManageTable th {
+            background-color: #00BFFF;
+            color: #FFFFFF
+        }
+
+        #bxUserManageTable td a {
+            text-decoration: none;
+        }
+
+        #bxUserManageTable, #bxUserManageTable th, #bxUserManageTable td {
+            font-size: 0.95em;
+            text-align: center;
+            padding: 6px;
+            border: 1px solid #dddddd;
+            border-collapse: collapse
+        }
+
+        #bxUserManageTable tr:nth-child(odd) {
+            background-color: #aae9fe;
+        }
+
+        #bxUserManageTable tr:nth-child(even) {
+            background-color: #fdfdfd;
+        }
+
+        /*操作按钮样式 Start*/
+        #operate_btn {
+            margin: 20px 0 20px 35px;
+            float: left;
+        }
+
+        #operate_search {
+            margin: 20px 0 20px 220px;
+            padding: 35px;
+            text-align: left;
+            border: 1px solid #b4b4b4;
+            font: 16px "Helvetica Neue", Helvetica, Arial, sans-serif;
+            color: #888;
+        }
+        .td_a_del {
+            color: grey;
+        }
+        .td_a_del:hover {
+            color: red;
+            font-weight: bold;
+        }
+        .td_a_edit:hover {
+            color: #a43dff;
+            font-weight: bold;
+        }
+
+        /*操作按钮样式 End*/
+        /* blue */
+        .bootstrap-frm {
+            margin-left:auto;
+            margin-right:auto;
+            max-width: 500px;
+            background: #FFF;
+            padding: 14px 8px;
+            font: 12px "Helvetica Neue", Helvetica, Arial, sans-serif;
+            color: #888;
+            text-shadow: 1px 1px 1px #FFF;
+            border:1px solid #DDD;
+            border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+        }
+        .bootstrap-frm:hover {
+            color: #333;
+            background-color: #EBEBEB;
+            border-color: #ADADAD;
+            /*padding: 14px 8px;*/
+        }
+        /*用户表格样式 End*/
+
+        /*新增用户模态框样式 Start*/
+        /* 弹窗 (background) */
+        .user_modal {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        /* 弹窗内容 */
+        .user_modal-content {
+            position: relative;
+            background-color: #fefefe;
+            margin: auto;
+            padding: 0;
+            border: 1px solid #888;
+            width: 35%;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+            -webkit-animation-name: animatetop;
+            -webkit-animation-duration: 0.4s;
+            animation-name: animatetop;
+            animation-duration: 0.4s
+        }
+
+        /* 添加动画 */
+        @-webkit-keyframes animatetop {
+            from {top:-300px; opacity:0}
+            to {top:0; opacity:1}
+        }
+
+        @keyframes animatetop {
+            from {top:-300px; opacity:0}
+            to {top:0; opacity:1}
+        }
+
+        /* 关闭按钮 */
+
+        .user_close {
+            color: #999;
+            /*float: right;*/
+            font-weight: bold;
+            text-decoration: none;
+            font: 16px "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        .user_submit {
+            font-weight: bold;
+            text-decoration: none;
+            color: #03a9f4;
+            margin-right: 15px;
+            font: 16px "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        .user_close:hover,
+        .user_close:focus {
+            color: grey;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .user_submit:hover,
+        .user_submit:focus {
+            color: #0c29bb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .user_modal-header > span {
+            color: white;
+            float: right;
+            font-size: 20px;
+        }
+        h3 {
+            margin-top: 5px;
+        }
+
+        .user_modal-header {
+            padding: 2px 16px;
+            background-color: #00BFFF;
+            color: white;
+        }
+
+        .user_modal-body {padding: 2px 60px;}
+
+        .user_modal-footer {
+            padding: 25px 16px 0px 16px;
+            background-color: white;
+            text-align: right;
+            color: white;
+            height: 50px;
+            border-top: 1px solid #e8e8e8;
+        }
+        #content_add_edit { /*弹出框内容样式*/
+            padding: 15px;
+        }
+        #content_add_edit > div { /*弹出框内容样式*/
+            padding: 10px;
+        }
+
+        /*新增用户模态框样式 End*/
+
+        /*查询按钮样式*/
+        .search-btn {
+            padding: 10px 14px;
+            margin-left: 60px;
+            background: #81e6f1;
+            font-weight: bold;
+        }
+
+
+        /*分页 Start*/
+        #ele{padding: 20px;float: right}
+        .clearfix::after {
+            content: ".";
+            clear: both;
+            display: block;
+            overflow: hidden;
+            font-size: 0;
+            height: 0;
+        }
+        .clearfix {
+            zoom: 1;
+        }
+
+        .Pagination ul{
+            list-style: none;
+        }
+        .Pagination .total_num,.first_page,.prepage,.list_box,.nextpage,.last_page,.total_page,.redir {
+            float: left;
+        }
+        .Pagination ul li {
+            float: left;
+            background-color: #ccc;
+            border-radius: 5px;
+            text-align: center;
+            line-height: 22px;
+            width: 22px;
+            height: 22px;
+            font-size: 12px;
+            margin: 0 5px;
+            cursor: pointer;
+            color: #8b8b8b
+        }
+        .Pagination ul li:hover {
+            background-color: #58acf4;
+            color: #fff;
+        }
+        .Pagination .total_num {
+            margin: 0 5px;
+        }
+        .Pagination .total_num i {
+            font-style: normal;
+        }
+        .Pagination .list_box {
+            width: 320px;
+            overflow: hidden;
+            position: relative;
+            height: 32px;
+        }
+        .Pagination .list_box ul {
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin: 0;
+            padding: 0;
+        }
+        .Pagination .prepage {
+            background-color: #ccc;
+            border-radius: 5px;
+            padding: 3px 10px;
+            font-size: 12px;
+            margin: 0 5px;
+            cursor: pointer;
+            color: #8b8b8b
+        }
+        .Pagination .prepage:hover {
+            background-color: #58acf4;
+            color: #fff;
+        }
+        .Pagination .nextpage {
+            background-color: #ccc;
+            border-radius: 5px;
+            padding: 3px 10px;
+            font-size: 12px;
+            margin: 0 5px;
+            cursor: pointer;
+            color: #8b8b8b
+        }
+        .Pagination .nextpage:hover {
+            background-color: #58acf4;
+            color: #fff;
+        }
+        .Pagination .first_page {
+            background-color: #ccc;
+            border-radius: 5px;
+            padding: 3px 10px;
+            font-size: 12px;
+            margin: 0 5px;
+            cursor: pointer;
+            color: #8b8b8b
+        }
+        .Pagination .first_page:hover {
+            background-color: #58acf4;
+            color: #fff;
+        }
+        .Pagination .last_page {
+            background-color: #ccc;
+            border-radius: 5px;
+            padding: 3px 10px;
+            font-size: 12px;
+            margin: 0 5px;
+            cursor: pointer;
+            color: #8b8b8b
+        }
+        .Pagination .last_page:hover {
+            background-color: #58acf4;
+            color: #fff;
+        }
+        .Pagination .redir {
+            background-color: #58acf4;
+            color: #fff;
+            border-radius: 5px;
+            padding: 3px 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .Pagination .redir:hover {
+            opacity: 0.8;
+        }
+        .Pagination input {
+            width: 50px;
+            height: 25px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+            text-indent: 5px;
+            margin: 0 5px;
+        }
+        .Pagination .short {
+            background-color: #fff;
+            cursor: default;
+        }
+        .Pagination .short:hover {
+            background-color: #fff;
+            color: #8b8b8b;
+        }
+        .Pagination_active {
+            background-color: #58acf4 !important;
+            color: #fff !important;
+        }
+        /*分页 End*/
+
+    </style>
+    <!-- 加载高德地图JSAPI脚本 -->
+    <script src="https://webapi.amap.com/maps?v=1.4.12&key=a96f1485c85033ab8c2e9b53538d4d54&plugin=AMap.Scale,AMap.ToolBar,AMap.OverView,AMap.ControlBar,AMap.CitySearch,AMap.Autocomplete,AMap.PlaceSearch"></script>
+
+    <!--加载百度地图脚本-->
+    <script type="text/javascript"
+            src="http://api.map.baidu.com/api?v=2.0&ak=0NIuUlCTTGztFjaP8IPfhW12glBlcxH5"></script>
+
+    <!--如果未引入webjars-locator，相关静态资源需要版本号，此处不便于升级-->
+    <!--因为额外引入了webjars-locator，所以相关静态资源的引入可省略版本号便于升级-->
+    <!--jquery-1.11.1-->
+    <!--<script th:src="@{/js/jquery-1.11.0.min.js}" type="text/javascript"></script>-->
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet" type="text/javascript"/>
+    <!--<link th:href="@{/webjars/bootstrap-select/dist/css/bootstrap-select.min.css}" rel="stylesheet" />-->
+    <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+    <!--<script th:src="@{/webjars/bootstrap-select/dist/js/bootstrap-select.min.js}"></script>-->
+
+    <!--swal提示框需要的样式-->
+    <!--用以解决swal is not define问题-->
+    <script th:src="@{/webjars/sweetalert/sweetalert.min.js}"></script>
+    <link rel="stylesheet" th:href="@{/webjars/sweetalert/sweetalert.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/flatpickr/dist/flatpickr.css}">
+    <script th:src="@{/webjars/flatpickr/dist/flatpickr.js}"></script>
+    <!-- jquery-confirm 消息弹出框插件 -->
+    <link rel="stylesheet" th:href="@{/css/jquery-confirm.css}">
+    <link rel="stylesheet" th:href="@{/css/jquery-confirm.min.css}">
+    <script th:src="@{/js/jquery-confirm.min.js}" type="text/javascript"></script>
+
+    <!-- jquery多图片上传 -->
+    <link rel="stylesheet" th:href="@{/css/webuploader/webuploader.css}">
+    <script type="text/javascript" th:src="@{/js/webuploader/webuploader.js}"></script>
+    <!--<link rel="stylesheet" th:href="@{/css/diy-upload.css}">-->
+    <!--<link rel="stylesheet" th:href="@{/css/webuploader.css}">-->
+    <!--<script th:src="@{/js/webuploader.min.js}" type="text/javascript"></script>-->
+    <!--<script th:src="@{/js/diyUpload.js}" type="text/javascript"></script>-->
+
+    <!--jqueryui-->
+    <link rel="stylesheet" th:href="@{/css/jqueryui/jquery-ui.css}" defer="defer">
+    <link rel="stylesheet" th:href="@{/css/jqueryui/jquery-ui.structure.css}" defer="defer">
+    <link rel="stylesheet" th:href="@{/css/jqueryui/jquery-ui.theme.css}" defer="defer">
+    <script th:src="@{/js/jqueryui/jquery-ui.js}" defer="defer"></script>
+
+    <!-- 引入项目js -->
+    <script th:src="@{/js/bxkj/common.js}" type="text/javascript"></script>
+    <script th:src="@{/js/bxkj/bxMapInfo.js}" type="text/javascript"></script>
+    <script th:src="@{/js/bxkj/bxGdMap.js}" type="text/javascript"></script>
+    <script th:src="@{/js/bxkj/userManage.js}" type="text/javascript"></script>
+    <script th:src="@{/js/paging.js}" type="text/javascript"></script>
+    <script th:src="@{/js/bxkj/mapAnimate.js}" type="text/javascript"></script>
+
+    <!--DataTables-->
+    <link type="text/css" rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css"/>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+
+
+    <title th:text="${name}"></title>
+
+</head>
+
+<body style="background-color: #f7f1f1">
+<!--公共标题栏 Start-->
+<div id="bx_bannar">
+    启岸伴行计调管理系统
+    <a href="logout">退出</a>
+</div>
+<div id="bx_title">
+    <ul id="bx_title_ul">
+        <li index="1" class="bx_li_click"><a href="javascript:;">✧ 数据采集 ✧</a></li>
+        <li index="2"><a href="javascript:;">✧ 账号管理 ✧</a></li>
+    </ul>
+</div>
+<!--公共标题栏 End-->
+
+<!--采集工具 Start-->
+<div id="bx_content">
+    <div id="scenery_box" style="float: left;">
+        <!--上传图片-->
+        <!--dom结构部分-->
+        <div id="uploader-images">
+            <!--用来存放item-->
+            <div id="fileList" class="uploader-list">
+                <!--<div class="file-item thumbnail"> //测试数据
+                    <img src="/_upload/xxx.jpg" style="width: 120px;height: 100px;">
+                    <div class="info">景区导览图</div>
+                </div>-->
+            </div>
+            <div>
+                <!--<div id="filePicker">选择图片</div>-->
+                <!--<input id="filePicker" type="file" class="webuploader-element-invisible">选择图片</input>-->
+                <div id="filePicker" class="webuploader-container">
+                    <div class="webuploader-pick">选择图片</div>
+                    <input type="file" name="file" class="webuploader-element-invisible"
+                           accept="image/jpg,jpeg,bmp,png">
+                </div>
+                <button id="ctlBtn" class="btn btn-default" style="padding: 6px 12px;">开始上传</button>
+            </div>
+        </div>
+
+
+    </div>
+    <!-- 景点搜索，地图展示 -->
+    <div id="div_name" style="font-size: 16px;">
+        <div class="ui-widget" style="position:fixed;float: left;margin-left: 210px;">
+            <label for="input_name">景点名称: </label>
+            <input type="text" id="input_name" placeholder="请输入景点名称"
+                   style="background-color: #dcd5d5;border: 1px solid #d0c0c0;"/>
+            <input id="fix_scenery_bt" type="button" class="webuploader-container" onclick="queryMapInfo()" value="搜索"/>
+            <!--<input id="line_check_bt" type="button" class="webuploader-container" onclick="checkLine()" value="线路校验"/>-->
+            <!--<input id="route_planning_bt" type="button" style="margin-left:20px;" onclick="routePlanningLine()" value="线路规划"/>-->
+            <!--<input id="walking_bt" type="button" style="margin-left:20px;font-size:16px;" onclick="routePlanningLine(this)" method="0" value="步行"/>
+            <input id="driving_bt" type="button" style="font-size:16px;" onclick="routePlanningLine(this)" method="1" value="驾车"/>
+            <input id="riding_bt" type="button" style="font-size:16px;" onclick="routePlanningLine(this)" method="2" value="骑行"/>-->
+        </div>
+    </div>
+    <!-- 折叠、展开div -->
+    <div class="change_map">
+        <select id="map_type_sel" class="selectpicker">
+            <option value="bd-map">百度地图</option>
+            <option value="gd-map">高德地图</option>
+            <option value="gg-map">谷歌地图</option>
+        </select>
+        <input id="show_overlay_bt" type="button" class="webuploader-container" showAndHide="hide"
+               onclick="showMapOverlay(this)" value="图层"/>
+        <button id="tog" type="button" class="btn webuploader-container" style="background: #81e6f1">折叠</button>
+        <!--清除浮动-->
+        <div style="clear: both"></div>
+    </div>
+    <!-- 百度地图 -->
+    <div id="bx_bdmap">
+    </div>
+
+</div>
+<!--采集工具 End-->
+
+<!--账户管理 Start-->
+<div id="bx_user_manage" class="hide_and_show">
+    <div id="operate_search">
+        <label for="">用户名：</label>
+        <input id="search_username" style="width: 125px;height: 20px;" placeholder="请输入用户名">
+        <input id="search_traId" type="hidden">
+        <input id="search_opDeptid" type="hidden">
+        <input id="search_operatorId" type="hidden">
+        <button class="bootstrap-frm search-btn" onclick="searchUserInfo();">查询</button>
+    </div>
+    <div id="operate_btn">
+        <button class="bootstrap-frm" onclick="addOrEditNewUser(this)">新增用户</button>
+        <button class="bootstrap-frm" onclick="batchDelUsersInfo()">批量删除</button>
+    </div>
+    <table class="display" id="bxUserManageTable">
+        <thead>
+        <tr>
+            <th><input id="checkAll" type="checkbox" onclick="siteChooseOrNoChoose(this)"/></th>
+            <th>用户id</th>
+            <th>用户</th>
+            <th>邮箱</th>
+            <th>创建时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+    <div id="ele">
+        <div class="Pagination"></div>
+    </div>
+</div>
+<!--账户管理 End-->
+
+<!--新增和修改模态框 Start-->
+<!-- 模态框（Modal） -->
+<div id="addOrEditModal" class="user_modal">
+    <!-- 弹窗内容 -->
+    <div class="user_modal-content">
+        <div class="user_modal-header">
+            <span class="user_close" onclick="user_close()">×</span>
+            <h3>Title</h3>
+        </div>
+        <div class="user_modal-body">
+
+
+        </div>
+        <div class="user_modal-footer">
+            <a href="javascript:;" class="user_submit" onclick="addOrEditUserInfo()">提交</a>
+            <a href="javascript:;" class="user_close" onclick="user_close()">取消</a>
+        </div>
+    </div>
+
+</div>
+<!--新增和修改模态框 End-->
+
+<!--清除浮动-->
+<div style="clear: both"></div>
+
+<script type="text/javascript">
+    $("#map_type_sel").on("change", function () { //监控切换地图
+        mapType = $("select  option:selected").val() //获取选中的下拉选的值
+        var queryValue = $("#input_name").val() //搜索框的值
+        if (mapType == "bd-map") { //切换百度地图
+            $("body").append(bdMap)
+            $("#bx_gdmap").remove()
+            $("#bx_ggmap").remove()
+            if (queryValue == "") {
+                bdFixedPosition() //定位当前城市(百度)
+            } else {
+                queryMapInfo() //搜索
+            }
+        } else if (mapType == "gd-map") { //切换高德地图
+            $("body").append(gdMap)
+            $("#bx_bdmap").remove()
+            $("#bx_ggmap").remove()
+            if (queryValue == "") {
+                loadGdMap() ////定位当前城市(高德)
+            } else {
+                queryMapInfo() //搜索
+            }
+        } else if (mapType == "gg-map") { //切换谷歌地图
+            $("body").append(ggMap)
+            $("#bx_bdmap").remove()
+            $("#bx_gdmap").remove()
+            if (queryValue == "") {
+                alert("google地图加载中...")
+            } else {
+                queryMapInfo() //搜索
+            }
+        }
+    })
+    //上传图片
+    // 初始化Web Uploader
+    var $ = jQuery,
+        $list = $('#fileList'),
+        ratio = window.devicePixelRatio || 1,
+        // 设置预览图的宽高
+        thumbnailWidth = 120 * ratio,
+        thumbnailHeight = 100 * ratio,
+        $btn = $('#ctlBtn'),
+        state = 'pending',
+        // Web Uploader实例
+        uploader;
+    // 创建Web Uploader实例
+    uploader = WebUploader.create({
+        auto: false, // 选完文件后，是否自动上传。
+        // swf文件路径
+        swf: '@{/js/swf/Uploader.swf}',  //swf路径采用thymeleaf模板引擎的路径方式 (@{})
+        // 文件接收服务端。（请求地址）
+        server: 'uploadImages',
+        // 选择文件的按钮。可选。
+        // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+        pick: {
+            id: '#filePicker',
+            multiple: false //关闭上传多张照片
+        },
+        // 只允许选择图片文件。
+        accept: {
+            title: 'Images',
+            extensions: 'jpg,jpeg,bmp,png',
+            mimeTypes: 'image/*'
+        }
+    });
+
+    // 当有文件添加进来的时候
+    uploader.on('fileQueued', function (file) {
+        var $li = $(
+            '<div id="' + file.id + '" class="file-item thumbnail">' +
+            '<img>' +
+            '<div class="info">' + file.name + '</div>' +
+            '<p class="state">等待上传...</p>' +
+            '</div>'
+            ),
+            $img = $li.find('img');
+        // $list为容器jQuery实例
+        $list.html("")  //限制只上传一张图片时加上这个
+        $list.append($li);
+        // 创建缩略图
+        // 如果为非图片文件，可以不用调用此方法。
+        // thumbnailWidth x thumbnailHeight 为 100 x 100
+        uploader.makeThumb(file, function (error, src) {
+            if (error) {
+                $img.replaceWith('<span>不能预览</span>');
+                return;
+            }
+            $img.attr('src', src);
+        }, thumbnailWidth, thumbnailHeight);
+    });
+
+    // 文件上传过程中创建进度条实时显示。
+    uploader.on('uploadProgress', function (file, percentage) {
+        var $li = $('#' + file.id),
+            $percent = $li.find('.progress .progress-bar');
+
+        // 避免重复创建
+        if (!$percent.length) {
+            $percent = $('<div class="progress progress-striped active">' +
+                '<div class="progress-bar" role="progressbar" style="width: 0%">' +
+                '</div>' +
+                '</div>').appendTo($li).find('.progress-bar');
+        }
+
+        $li.find('p.state').text('上传中');
+
+        $percent.css('width', percentage * 100 + '%');
+    })
+
+    uploader.on('uploadSuccess', function (file) {
+        $('#' + file.id).find('p.state').text('已上传');
+    });
+
+    uploader.on('uploadError', function (file) {
+        $('#' + file.id).find('p.state').text('上传出错');
+    });
+
+    uploader.on('uploadComplete', function (file) {
+        $('#' + file.id).find('.progress').fadeOut();
+    })
+
+    $btn.on('click', function () {
+        if (state === 'uploading') {
+            uploader.stop();
+        } else {
+            uploader.upload();
+        }
+    });
+
+    //定位当前位置 start
+    var map = new BMap.Map("bx_bdmap", {enableMapClick: false}); //enableMapClick:false关闭地图可点功能
+
+    function myFun(result) {
+        var cityName = result.name;
+        // map.setCenter(cityName);
+        console.log("当前定位城市:" + cityName + ",坐标为：" + result.center.lng + "," + result.center.lat);
+        var lng = result.center.lng
+        var lat = result.center.lat
+        // var point = new BMap.Point(lng, lat);
+        // var marker = new BMap.Marker(point);
+        // map.addOverlay(marker); // 添加标注
+        // map.enableScrollWheelZoom(true); //滚动缩放
+        // map.centerAndZoom(point,17);
+        // map.setMapStyle({style: 'light'});//设置地图样式 JavaScriptAPI V2.0 用法
+
+        /*图层 Start*/
+        /*var tileLayer = new BMap.TileLayer();
+        tileLayer.getTilesUrl = function(tileCoord, zoom) { //向地图返回地图图块的网址
+            var x = tileCoord.x;
+            var y = tileCoord.y;
+            return '/_upload/tiles/' + zoom + '/tile-' + x + '_' + y + '.png';
+        }
+        alert(tileLayer.isTransparentPng())
+        // var map = new BMap.Map('map');
+        map.addTileLayer(tileLayer);
+        map.addControl(new BMap.NavigationControl());*/
+        /*图层 End*/
+
+        map.centerAndZoom(cityName, 17);//初始化地图，设置地图级别
+        map.enableScrollWheelZoom(true);
+        // 创建自定义控件实例
+        var myZoomCtrl = new ZoomControl();
+        // 添加到地图当中
+        map.addControl(myZoomCtrl);
+
+        // showSceneryInfoMap(cityName);// 展示当前城市地图
+        /*map.addEventListener("rightclick", function (e) {//设置鼠标右键点击事件
+            console.log(e.point.lng + "," + e.point.lat);
+            var lng = e.point.lng;
+            var lat = e.point.lat;
+            var menu = new BMap.ContextMenu(); //右键菜单
+            var txtMenuItem = [//右键菜单项目
+                {
+                    text: '添加新景点',
+                    callback: function () { //返回函数中进行相应逻辑操作
+                        console.log('添加新景点');
+                        map.clearOverlays() //清空覆盖物
+                        $(".BMap_contextMenu").remove() //删除菜单项
+                        var title = "新增景点";
+                        addNewSceneryInfos(map, lng, lat, title)
+
+                    }
+                },
+                {
+                    text: '开始绘制',
+                    callback: function () {
+                        console.log('开始绘制');
+                        if ("routing" == flag) {
+                            map.clearOverlays()
+                            pointList.length = 0
+                            pointS.length = 0
+                        }
+                        flag = "start"
+                        $(".BMap_contextMenu").remove() //删除菜单项
+                        map.clearOverlays() //清空覆盖物
+                        startToDraw(map, pointList)
+                        console.log("开始绘制")
+                    }
+                },
+                {
+                    text: '完成绘制',
+                    callback: function () {
+                        console.log('完成绘制');
+                        $(".BMap_contextMenu").remove() //删除菜单项
+                        endDraw(map, pointList)
+                        console.log("完成绘制")
+                    }
+                },
+                {
+                    text: '取消绘制',
+                    callback: function () {
+                        // removeClick(map)
+                        console.log('取消绘制');
+                        $(".BMap_contextMenu").remove() //删除菜单项
+                        cancelDraw(map, pointList)
+                        // pointListTemp = pointList.concat() //方式一实现数组的深拷贝
+                    }
+                },
+                {
+                    text: '线路规划',
+                    callback: function () {
+                        console.log('线路规划');
+                        if ("start" == flag) {
+                            map.clearOverlays()
+                            pointList.length = 0
+                            pointS.length = 0
+                        }
+                        flag = "routing"
+                        $(".BMap_contextMenu").remove() //删除菜单项
+                        if (pointList.length > 0 && pointList.length < 2) {
+                            title = "友情提示"
+                            msg = "请先使用鼠标左键标出两点,再进行路线规划"
+                            showWarning(title, msg)
+                        }
+                        startToDraw(map, pointList)
+                        console.log("开始规划")
+                    }
+                }];//右键菜单
+            for (var i = 0; i < txtMenuItem.length; i++) {
+                menu.addItem(new BMap.MenuItem(txtMenuItem[i].text, txtMenuItem[i].callback, 100)); //菜单添加项目
+            }
+            map.addContextMenu(menu)
+
+            // menu.enableMassClear();//允许覆盖物在map.clearOverlays方法中被清除
+            // setInfoWindow(map, lng, lat);
+        });*/
+    }
+
+    var myCity = new BMap.LocalCity();
+    myCity.get(myFun);
+    //定位当前位置 end
+</script>
+
+</body>
+
+</html>
+
