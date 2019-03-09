@@ -2,6 +2,13 @@ package com.bx.gis.common;
 
 import lombok.Data;
 
+/**
+  * @Author Breach
+  * @Description 地图公共类
+  * @Date 2019/3/9
+  * @Param null
+  * @return
+  */
 @Data
 public class MapConstant {
     //Google API密钥
