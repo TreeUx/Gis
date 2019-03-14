@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 /**
   * @Author Breach
-  * @Description
+  * @Description 设置项目启动后，浏览器自动打开首页
   * @Date 2019/3/14
   * @return
   */
