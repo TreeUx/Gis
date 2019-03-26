@@ -17,7 +17,7 @@ var a = 6378245.0;
 var ee = 0.00669342162296594323;
 /*坐标转换需要的常量 End*/
 var addLineClick; //鼠标点击事件
-
+var characterBl = false
 $(function () {
     /*测试百度坐标转换 Start*/
     /* var convertor = new BMap.Convertor()
@@ -90,10 +90,12 @@ $(function () {
         if (t == "折叠") {
             $(this).text("展开");
             // $("#scenery_box").css('display','none');
-            $("#scenery_box").fadeOut("5000");
+            $("#scenery_box").fadeOut("3000");
+            $("#bx_bdmap").css("margin-top", "45px") //设置地图离页面顶部的距离
         } else {
             // $("#scenery_box").css('display','block');
-            $("#scenery_box").fadeTo("5000", 0.9)
+            $("#scenery_box").fadeTo("3000", 0.9)
+            $("#bx_bdmap").css("margin-top", "220px") //设置地图离页面顶部的距离
             $(this).text("折叠");
         }
     });
@@ -154,6 +156,32 @@ $(function () {
         }
     });
     /*点击标题添加样式 End*/
+
+    //选择特色星级
+    $(".save-cstc").on("click", function () {
+        var fea={
+            // "product_id":parentid,
+            // "id": fea_id,
+            //"com_code":com_code,             //      商品编号
+            "epidemic":$(".fashion .axis").val()||0,       //int   流行性-对应等级
+            "recreational":$(".relex .axis").val()||0,   //int   休闲性-对应等级
+            "nostalgic":$(".nos .axis").val()||0,      //int   怀旧性-对应等级
+            "romantic":$(".romantic .axis").val()||0,       //int   浪漫性-对应等级
+            "parent_child":$(".parentage .axis").val()||0,   //int   亲子性-对应等级
+            "naturalness":$(".natural .axis").val()||0,    //int   自然性-对应等级
+            "singularity":$(".special .axis").val()||0,    //int   奇特性-对应等级
+            "excitement":$(".excit .axis").val()||0,     //int   刺激性-对应等级
+            "culture":$(".culture .axis").val()||0,        //int   文化性-对应等级
+            "ornamental":$(".watching .axis").val()||0,     //int   观赏性-对应等级
+            "participatory":$(".participate .axis").val()||0,  //int   参与性-对应等级
+            "iconic":$(".symbol .axis").val()||0          //int   标志性:对应等级
+        }
+        console.log(JSON.stringify(fea))
+        $("#character_type").val(JSON.stringify(fea)) //资源特色
+        console.log(typeof $("#character_type").val())
+        $("#modal-cstc").modal("hide") //隐藏特色星级模态框
+        characterBl = true //判断是否点击进行特色星级选择
+    })
 
 });
 
@@ -848,11 +876,11 @@ function showEntranceMarkImg(map, locaArray, parentid) {
             if (i == locaArray.length) {
                 map.centerAndZoom(point, 17);//map.getZoom()返回当前地图的缩放级别
             }
-            var myIcon = new BMap.Icon("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1546917665768&di=843f4c70495ad74df101a7c0f7a25034&imgtype=0&src=http%3A%2F%2Fhbimg.b0.upaiyun.com%2F0344e8a7305525093bf7a472dd9dd95079e3fa8910538-NzRbh3_fw658"
-                , new BMap.Size(90, 50) //设置可视面积//150 80
+            var myIcon = new BMap.Icon("/images/tacked.png"
+                , new BMap.Size(45, 30) //设置可视面积//150 80
                 , {
                     imageOffset: new BMap.Size(0, 0), //图片相对于可视区域的偏移值
-                    imageSize: new BMap.Size(90, 50) //图标所用的图片的大小
+                    imageSize: new BMap.Size(45, 30) //图标所用的图片的大小
                 }); //创建自定义标注物
             // 初始化地图， 设置中心点坐标和地图级别
             var marker1 = new BMap.Marker(point, {icon: myIcon, title: "出入口"});
@@ -1099,7 +1127,7 @@ function showEntranceMarkImg(map, locaArray, parentid) {
                                 temp_point.lng = lng //保留6位小数后得经度
                                 temp_point.lat = lat //保留6位小数后的经度
                                 enterAndExitArr.push(temp_point) //将转换后的出入口坐标放入出入口坐标集合中，供采点起点和终点校验时使用
-                                var myIcon = new BMap.Icon("http://lbsyun.baidu.com/jsdemo/img/Mario.png"
+                                var myIcon = new BMap.Icon("/images/map1.png"
                                     , new BMap.Size(40, 35) //设置可视面积//40 35
                                     , {
                                         imageOffset: new BMap.Size(0, 0), //图片相对于可视区域的偏移值
@@ -1333,11 +1361,11 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         updateLat = (updateLat * 1.0).toFixed(6)
     }
     var com_name = "" //景点名称
-    var state = "" //国家
+    var state = 0 //国家
     var city = "" //城市
     var com_address = "" //详细地址
-    var com_begining = "" // 服务开始时间
-    var com_moment = "" //服务结束时间
+    var com_begining = "08:00" // 服务开始时间
+    var com_moment = "20:00" //服务结束时间
     var com_best = "" //最佳游玩时间
     var com_level = "" //伴行级别
     var com_introduce = "" //备注
@@ -1360,52 +1388,52 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         lat = com_central.substring(com_central.indexOf(",") + 1, com_central.length)
     }
     //右键菜单
-    var content = '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true" >' +
+    var content = '<div id="myModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true" >' +
         '<div class="modal-dialog">' +
-        '<div class="modal-content">' +
+        '<div class="modal-content" style="width: 435px;height: 627px;">' +
         // '<div class="modal-header">' +
         //     '<h4 class="modal-title" id="addModalLabel" style="border-bottom: 1px solid #878787;padding-bottom: 15px;">新增景点</h4>' +
         // '</div>' +
         '<div class="modal-body">' +
         '<form id="addSceneryModalForm" action="" class="form-horizontal">' +
         '<div class="row">' +
-        '<div class="row" style="padding: 10px;margin-top:10px;border-top: 1px solid grey;">' +
-        '<div class="form-group">' +
+        '<div class="row" style="padding: 10px;margin-top:10px;">' +
+        '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;margin-left: 30px;">' +
         '<label for="scenery_name" class="control-label"><span  style="color: red;"> * </span>名称：</label>' +
         '</div>' +
-        '<div class="col-sm-9">' +
-        '<input id="scenery_name" name="scenery_name" type="text" style="margin-left: 10px;" value="' + com_name + '" placeholder="请输入景点名称"/>' +
+        '<div class="">' +
+        '<input id="scenery_name" name="scenery_name" type="text" style="margin-left: -8px;" value="' + com_name + '" placeholder="请输入景点名称"/>' +
         '</div>' +
         '</div>' +
         '</div>' +
         '<div class="row" style="padding: 7px;">' +
-        '<div class="form-group">' +
+        '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;margin-left: 30px;">' +
         '<label for="continents" class="control-label"><span  style="color: red;"> * </span>地区：</label>' +
         '</div>' +
-        '<div class="col-sm-3"  style="float: left;margin-left:10px;">' +
-        '<select id="continents" name="continents" class="selectpicker" >' +
-        '<option value="1">欧洲</option>' +
-        '<option value="0" selected>亚洲</option>' +
-        '<option value="2">非洲</option>' +
+        '<div class="col-sm-3"  style="float: left;width: 95px;margin-left: -20px;">' +
+        '<select id="continents" name="continents" class="selectpicker" style="width: 80px;">' +
+        // '<option value="1">欧洲</option>' +
+        // '<option value="0" selected>亚洲</option>' +
+        // '<option value="2">非洲</option>' +
         '</select>' +
         '</div>' +
-        '<div class="col-sm-3"  style="float: left;margin-left:10px;">' +
-        '<select id="state" name="state" class="selectpicker" >' +
-        '<option value="0" selected>中国</option>' +
+        '<div class="col-sm-3"  style="float: left;width: 95px;">' +
+        '<select id="state" name="state" class="selectpicker" style="width: 80px;">' +
+        // '<option value="0" selected>中国</option>' +
         '</select>' +
         '</div>' +
         '<div class="col-sm-3">' +
-        '<select id="city" name="city" style="margin-left:10px;" class="selectpicker" >' +
-        '<option value="" selected>请选择城市</option>' +
-        '<option value="0">广东</option>' +
+        '<select id="city" name="city" style="width: 80px;" class="selectpicker" >' +
+        // '<option value="" selected>请选择城市</option>' +
+        // '<option value="0">广东</option>' +
         '</select>' +
         '</div>' +
         '</div>' +
         '</div>' +
         '<div class="row" style="padding: 7px;">' +
-        '<div class="form-group">' +
+        '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;">' +
         '<label for="scenery_address" class="control-label"><span style="color: red;"> * </span>详细地址：</label>' +
         '</div>' +
@@ -1415,33 +1443,36 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '</div>' +
         '</div>' +
         '<div class="row" style="padding: 7px;">' +
-        '<div class="form-group">' +
+        '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;">' +
-        '<label for="scenery_type" class="control-label"><span  style="color: red;"> * </span>资源特色：</label>' +
+        '<label for="character_type" class="control-label"><span  style="color: red;"> * </span>资源特色：</label>' +
         '</div>' +
         '<div class="col-sm-9">' +
-        '<select id="scenery_character" name="scenery_character" class="selectpicker"  style="margin-left: 10px;">' +
-        '<option value="" selected> 请选择特色</option>' +
-        '<option value="0">人文景观</option>' +
-        '</select>' +
+        '<input id="character_type" name="character_type" type="hidden" value=""/>' +
+        '<a href="javascript:;" onclick="showStarModal();" data-toggle="modal" ' +
+        'style="color: blue!important;font-size: 14px;margin-left: 10px;" data-target="#modal-cstc">点击选择</a>' +
         '</div>' +
         '</div>' +
         '</div>' +
         '<div class="row" style="padding: 7px;">' +
-        '<div class="form-group">' +
-        '<div class="col-sm-3" style="float: left;margin-left: 35px;">' +
+        '<div class="form-group" style="width: 456px;">' +
+        '<div class="col-sm-3" style="float: left;margin-left: 30px;">' +
         '<label for="scenery_type" class="control-label"><span  style="color: red;"> * </span>类型：</label>' +
         '</div>' +
-        '<div class="col-sm-9">' +
-        '<select id="scenery_type" name="scenery_type" class="selectpicker"  style="margin-left: 10px;">' +
-        '<option value="" selected> 请选择类型</option>' +
-        '<option value="0">山水风景</option>' +
+        '<div class="">' +
+        '<select id="scenery_type" name="scenery_type" class="selectpicker"  style="margin-left: -5px;width: 80px;">' +
+        '<option value="1" selected="selected">1. 吃</option>' +
+        '<option value="2">2. 住</option>' +
+        '<option value="3">3. 行</option>' +
+        '<option value="4">4. 游</option>' +
+        '<option value="5">5. 娱</option>' +
+        '<option value="6">6. 购</option>' +
         '</select>' +
         '</div>' +
         '</div>' +
         '</div>' +
         '<div class="row" style="padding: 7px;">' +
-        '<div class="form-group">' +
+        '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;">' +
         '<label for="" class="control-label">地图经纬度：</label>' +
         '</div>' +
@@ -1454,7 +1485,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '<div id="addPoints" class="row" type="hidden" style="padding-top: 3px;max-height: 75px;overflow-y:auto;">' +
         '</div>' +
         '<div class="row" style="padding: 7px;">' +
-        '<div class="form-group">' +
+        '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;">' +
         '<label for="scenery_start_time scenery_end_time" class="control-label"><span  style="color: red;"> * </span>开放时段：</label>' +
         '</div>' +
@@ -1465,7 +1496,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '</div>' +
         '</div>' +
         '<div class="row" style="padding: 7px;">' +
-        '<div class="form-group">' +
+        '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;">' +
         '<label for="com_best" class="control-label"><span  style="color: red;"> * </span>游玩时间：</label>' +
         '</div>' +
@@ -1475,7 +1506,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '</div>' +
         '</div>' +
         '<div class="row" style="padding: 7px;">' +
-        '<div class="form-group">' +
+        '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;">' +
         '<label for="" class="control-label"><span  style="color: red;"> * </span>伴行级别：</label>' +
         '</div>' +
@@ -1488,17 +1519,17 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '</div>' +
         '</div>' +
         '<div class="row" style="padding: 7px;">' +
-        '<div class="form-group">' +
-        '<div class="col-sm-3" style="float: left;margin-left: 45px;">' +
+        '<div class="form-group" style="width: 456px;">' +
+        '<div class="col-sm-3" style="float: left;margin-left: 38px;">' +
         '<label for="" class="control-label">备注：</label>' +
         '</div>' +
-        '<div class="col-sm-9">' +
-        '<textarea id="scenery_remark" name="scenery_remark" rows="3" cols="20" style="margin-left: 10px;">' + com_introduce + '</textarea>' +
+        '<div class="">' +
+        '<textarea id="scenery_remark" name="scenery_remark" rows="3" cols="20" style="margin-left: -15px;">' + com_introduce + '</textarea>' +
         '</div>' +
         '</div>' +
         '</div>' +
         '<div class="row" style="padding: 7px;">' +
-        '<div class="form-group">' +
+        '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;">' +
         '<label class="control-label"></span>上传图片：</label>' +
         '</div>' +
@@ -1525,7 +1556,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         offset: new BMap.Size(0, 0), //设置弹窗偏移量
         width: 430, //设置弹窗宽度
         height: 720, //取值范围：0, 220 - 730。如果您指定宽度为0，则信息窗口的宽度将按照其内容自动调整
-        enableAutoPan: false, //是否开启信息窗口打开时地图自动移动（默认开启）
+        enableAutoPan: true, //是否开启信息窗口打开时地图自动移动（默认开启）
         enableCloseOnClick: false //是否开启点击地图关闭信息窗口（默认开启）
         // title: "新增景点"
     }); //创建信息窗口对象
@@ -1539,10 +1570,12 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         if (infoWindow.isOpen()) {   //添加景点窗口打开后，添加照片事件
             // infoWindow.setContent(content)
             $("#city").val(city); //初始化城市下拉选
-            $("#scenery_character").val(0); //初始化城市下拉选
-            $("#scenery_character").val(0); //初始化资源特色下拉选
-            $("#scenery_type").val(0); //初始化类型下拉选
+            // $("#state").val(0); //初始化国家下拉选
+            // $("#scenery_character").val(0); //初始化资源特色下拉选
+            $("#scenery_type").val(1); //初始化类型下拉选
             listenTitleShow();
+
+            // $('#myModal').draggable(); //设置模态框可以拖拽
 
             /*转换坐标点 Start*/
             var everPoint = $("#location").text()
@@ -1570,8 +1603,36 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
                 })
             }
             /*转换坐标点 End*/
+
+            //初始化下拉选
+            for (var i = 0; i < GlobalCity.length; i++) { //国家
+                $("#continents").append(
+                    '<option value="' + GlobalCity[i].id + '">' + GlobalCity[i].value + '</option>'
+                )
+            }
+            for (var i = 1; i < GlobalCity[0].child.length; i++) { //省
+                $("#state").append(
+                    '<option value="' + GlobalCity[0].child[i].id + '">' + GlobalCity[0].child[i].value + '</option>'
+                );
+            }
+            for (var i = 1; i < GlobalCity[0].child[1].child.length; i++) { //市
+                $("#city").append(
+                    '<option value="' + GlobalCity[0].child[1].child[i].id + '">' + GlobalCity[0].child[1].child[i].value + '</option>'
+                );
+            }
+
+            $("#continents").change(queryProvinceInfo)
+            $("#state").change(queryCityInfo)
+            $("#city").change(function () {
+                var city = $("#city").find("option:selected").text();
+            })
+
         }
     }, 50);
+}
+//展示特色星级选择模态框
+function showStarModal() {
+    $("#modal-cstc").modal("show")
 }
 
 /*添加、移除事件 Start*/
@@ -1654,10 +1715,12 @@ function listenTitleShow() {
 
     // 当有文件添加进来的时候
     uploader.on('fileQueued', function (file) {
+        var fileName = new Date().getTime() + ".jpg"; //自定义上传图片的名称
         var $li = $(
-            '<div id="' + file.id + '" class="file-item thumbnail" style="float:left;padding-left:10px;">' +
+            '<div id="' + file.id + '" class="file-item thumbnail" style="float:left;padding-left:10px;width:105px;">' +
             '<img>' +
-            '<div class="info">' + file.name + '</div>' +
+            // '<div class="info">' + file.name + '</div>' +
+            '<div class="info">' + fileName + '</div>' +
             '</div>'
             ),
             $img = $li.find('img');
@@ -1718,24 +1781,27 @@ function closeSceneryInfoModel() {
 function submitSceneryInfo(e) {//lng, lat为当前点击的点的经纬度坐标
     var objReg = /^[0-9]+$/;  //正则判断最佳游玩时间是否为正整数
     title = "必填项提示"
+    var continents = $("#continents").val() == null ? "" : $("#continents").val()
+    var state = $("#state").val() == null ? "" : $("#state").val()
+    var city = $("#city").val() == null ? "" : $("#continents").val()
     //表单验证
     if ($("#scenery_name").val() == "") {//景点名称
         msg = "请输入景点名称"
         showWarning(title, msg)
-    } else if ($("#continents").val() == "") {//地区
+    } else if (continents == "" && $("#continents").find("option").length != 0) {//国家
         msg = "请选择地区"
         showWarning(title, msg)
-    } else if ($("#nation").val() == "") {//国家
+    } else if ($("#state").val() == "" && $("#state").find("option").length != 0) {//省份
         msg = "请选择国家"
         showWarning(title, msg)
-    } else if ($("#city").val() == "") {//城市
+    } else if ($("#city").val() == "" && $("#city").find("option").length != 0) {//城市
         msg = "请选择城市"
         showWarning(title, msg)
     } else if ($("#scenery_address").val() == "") {//详细地址
         msg = "请输入详细地址"
         showWarning(title, msg)
-    } else if ($("#scenery_character").val() == "") {//景点特色
-        msg = "请选择景点特色"
+    } else if (!characterBl) {//景点特色
+        msg = "请选择资源特色"
         showWarning(title, msg)
     } else if ($("#scenery_type").val() == "") {//类型
         msg = "请选择类型"
@@ -1803,11 +1869,11 @@ function addMarkImg(map, lng, lat, comCode, e) {
         var point = new BMap.Point(lng, lat);
         // 创建点坐标
         map.centerAndZoom(point, map.getZoom());//map.getZoom()返回当前地图的缩放级别
-        var myIcon = new BMap.Icon("http://lbsyun.baidu.com/jsdemo/img/Mario.png"
-            , new BMap.Size(35, 45) //设置可视面积
+        var myIcon = new BMap.Icon("/images/map1.png"
+            , new BMap.Size(40, 45) //设置可视面积
             , {
                 imageOffset: new BMap.Size(0, 0), //图片相对于可视区域的偏移值
-                imageSize: new BMap.Size(25, 30) //图标所用的图片的大小
+                imageSize: new BMap.Size(30, 35) //图标所用的图片的大小
             }); //创建自定义标注物
         // 初始化地图， 设置中心点坐标和地图级别
         var marker1 = new BMap.Marker(point, {icon: myIcon, title: "查看详情"});
@@ -1869,7 +1935,7 @@ function addMarkImg(map, lng, lat, comCode, e) {
     // })
 }
 
-//修改景点信息
+//修改景点单元信息
 function updateSceneryInfo(map, lng, lat, title, marker) {
     console.log(marker)
     var comCode = marker.customData.myProperty
@@ -1893,7 +1959,7 @@ function updateSceneryInfo(map, lng, lat, title, marker) {
     });
 }
 
-//删除景点
+//删除景点单元
 function deleteSceneryInfo(map, marker2) {
     console.log(marker2)
     console.log(marker2.customData.myProperty)
@@ -2393,3 +2459,52 @@ function fireKeyEvent(el, evtType, keyCode) {
 }
 
 /*JS 模拟键盘鼠标点击 End*/
+
+//根据选择的国家查询省份下拉选信息
+function queryProvinceInfo() {
+    var state = $("#continents").val()
+    for (var i = 0; i < GlobalCity.length; i++) {
+        if (state == GlobalCity[i].id) {
+            $("#state").html("")
+            if (GlobalCity[i].child != undefined) {
+                for (var j = 1; j < GlobalCity[i].child.length; j++) {
+                    $("#state").append(
+                        '<option value="' + GlobalCity[i].child[j].id + '">' + GlobalCity[i].child[j].value + '</option>'
+                    );
+                }
+                queryCityInfo()
+                break
+            } else {
+                $("#city").html("")
+            }
+        }
+    }
+}
+
+//根据选择的省份信息查询城市下拉选信息
+function queryCityInfo() {
+    var state = $("#continents").val()
+    var province = $("#state").val()
+    for (var i = 0; i < GlobalCity.length; i++) {
+        if (state == GlobalCity[i].id) {
+            for (var j = 0; j < GlobalCity[i].child.length; j++) {
+                if (province == GlobalCity[i].child[j].id) {
+                    $("#city").html("")
+                    if (GlobalCity[i].child[j].child != undefined) {
+                        for (var k = 1; k < GlobalCity[i].child[j].child.length; k++) {
+                            $("#city").append(
+                                '<option value="' + GlobalCity[i].child[j].child[k].id + '">' + GlobalCity[i].child[j].child[k].value + '</option>'
+                            );
+                        }
+                    }
+                    var city = $("#city").find("option:selected").text();
+                    var province = $("#state").find("option:selected").text();
+                    var state = $("#continents").find("option:selected").text();
+                    console.log(city == "")
+                    city = city == "" ? (province == "" ? state : province) : city
+                    break
+                }
+            }
+        }
+    }
+}

@@ -69,6 +69,7 @@
 		u_user
 	  WHERE
 	  	nickname = #{nickname}
+	  	AND parent_id = #{id}
 	</select>
 
     <!--删除用户信息-->

@@ -2,31 +2,19 @@ package com.bx.gis.controller;
 
 import com.bx.gis.common.StringRandom;
 import com.bx.gis.entity.BxCommodityCommon;
+import com.bx.gis.entity.BxSubjectivity;
 import com.bx.gis.service.SceneryInfoService;
-import com.bx.gis.utils.ImageUtil;
-import com.bx.gis.utils.JsonResult;
+import net.sf.json.JSONObject;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -122,20 +110,20 @@ public class SceneryInfoController {
      * @Date 2018/12/29
      * @Param image
      */
-    @RequiresAuthentication
+    /*@RequiresAuthentication
     @RequestMapping("/uploadImages")
     @ResponseBody
     public String uploadImages(@RequestParam("file") MultipartFile image, HttpServletRequest request
             , HttpServletResponse response, HttpSession session) throws IOException {
 //        File imageFolder = new File(session.getServletContext().getRealPath(UPLOAD_IMAGES)); //获取用户c盘目录下的地址
-        /***********************************/
+        *//***********************************//*
         System.out.println(System.getProperty("user.dir"));//获取当前项目根路径
         System.out.println(new File(this.getClass().getResource("/").getPath())); //获取target下的路径
         //获取类加载的根路径
 //        File imageFolder = new File(this.getClass().getResource("/").getPath()+ File.separator + UPLOAD_IMAGES);
         File imageFolder = new File(System.getProperty("user.dir") + File.separator + UPLOAD_IMAGES);
 //        System.out.println(imageFolder);
-        /***********************************/
+        *//***********************************//*
         String fileName = UUID.randomUUID().toString().replace("-", "") + ".jpg";//生成唯一标识，避免文件名重复
         File file = new File(imageFolder, fileName);
         if (!file.getParentFile().exists()) {
@@ -152,7 +140,7 @@ public class SceneryInfoController {
         result.setCode(100);
         result.setMessage("上传成功");
         return new JSONObject(result).toString();
-    }
+    }*/
 
     /**
      * @return java.util.Map<java.lang.String   ,   java.lang.Object>
@@ -171,11 +159,10 @@ public class SceneryInfoController {
         int parentid = Integer.parseInt("undefined".equals(request.getParameter("parentid")) ?"0":request.getParameter("parentid"));//父类id
         String com_code = request.getParameter("com_code");//商品代码
         String scenery_name = request.getParameter("scenery_name");//名称
-        String continents = request.getParameter("continents");//地区（欧亚非）
-        String state = request.getParameter("state");//国家
+        String state = request.getParameter("continents");//国家
+        String province = request.getParameter("state");//省份
         String city = request.getParameter("city");//城市
         String scenery_address = request.getParameter("scenery_address");//详细地址
-        String scenery_character = request.getParameter("scenery_character");//资源特色
         int scenery_type = Integer.parseInt(request.getParameter("scenery_type"));//景点类型（暂未定）
         String scenery_location = request.getParameter("scenery_location");//坐标
         Date scenery_start_time = sdf.parse(request.getParameter("scenery_start_time"));//景区开放开始时间
@@ -184,16 +171,33 @@ public class SceneryInfoController {
         String bx_level = request.getParameter("bx_level");//伴行级别
         String scenery_remark = request.getParameter("scenery_remark");//备注
         String[] com_duplex = request.getParameterValues("com_duplex");
+        String character_type = request.getParameter("character_type"); //资源特色
+        JSONObject characterJo = JSONObject.fromObject(character_type.toString());
+        System.out.println(characterJo);
+        int epidemic = Integer.parseInt(characterJo.get("epidemic").toString()); //流行性
+        int recreational = Integer.parseInt(characterJo.get("recreational").toString()); //休闲性
+        int nostalgic = Integer.parseInt(characterJo.get("nostalgic").toString()); //怀旧性
+        int romantic = Integer.parseInt(characterJo.get("romantic").toString()); //浪漫性
+        int parent_child = Integer.parseInt(characterJo.get("parent_child").toString()); //亲子性
+        int naturalness = Integer.parseInt(characterJo.get("naturalness").toString()); //自然性
+        int singularity = Integer.parseInt(characterJo.get("singularity").toString()); //奇特性
+        int excitement = Integer.parseInt(characterJo.get("excitement").toString()); //刺激性
+        int culture = Integer.parseInt(characterJo.get("culture").toString()); //文化性
+        int ornamental = Integer.parseInt(characterJo.get("ornamental").toString()); //观赏性
+        int participatory = Integer.parseInt(characterJo.get("participatory").toString()); //参与性
+        int iconic = Integer.parseInt(characterJo.get("iconic").toString()); //标志性
         if(com_duplex != null && com_duplex.length != 0) {
             for (int i = 0; i < com_duplex.length; i++) { //双向出入口
                 comDuplex += (com_duplex[i] + " ");
             }
         }
-        BxCommodityCommon bcc = new BxCommodityCommon();
+        BxCommodityCommon bcc = new BxCommodityCommon(); //商品实体类
+        BxSubjectivity bs = new BxSubjectivity(); //资源特色实体类
         bcc.setParentid(parentid);
         bcc.setComName(scenery_name);
-        bcc.setState(state);
-        bcc.setCity(city);
+        bcc.setState(state); //国家
+        bcc.setProvince(province); //省份
+        bcc.setCity(city); //城市
         bcc.setComAddress(scenery_address);
         bcc.setComCentral(scenery_location);
         bcc.setComDuplex(comDuplex);
@@ -202,20 +206,36 @@ public class SceneryInfoController {
         bcc.setComBest(com_best);
         bcc.setComLevel(bx_level);
         bcc.setComIntroduce(scenery_remark);
+        bcc.setComType(scenery_type); //商品类型
+        //资源特色
+        bs.setEpidemic(epidemic);
+        bs.setRecreational(recreational);
+        bs.setNostalgic(nostalgic);
+        bs.setRomantic(romantic);
+        bs.setParentChild(parent_child);
+        bs.setNaturalness(naturalness);
+        bs.setSingularity(singularity);
+        bs.setExcitement(excitement);
+        bs.setCulture(culture);
+        bs.setOrnamental(ornamental);
+        bs.setParticipatory(participatory);
+        bs.setIconic(iconic);
+        bs.setProductId(com_code); //商品编码
         int len = scenery_location.length();
         int index = scenery_location.indexOf(",");
         try {
             int count = sceneryInfoService.querySceneryIfExist(scenery_name);//添加前，查询该景点是否已经存在，不存在再添加
             if (com_code == "") {
                 com_code = new StringRandom().getStringRandom(8);//商品编码
-                bcc.setComCode(com_code);
+                bcc.setComCode(com_code); //商品编码
+                bs.setProductId(com_code); //商品编码
                 if (count > 0) {
                     results.put("msg", "该景点信息已存在");
                     results.put("status", "error");
                     return results;
                 } else {
                     int num = sceneryInfoService.addNewSceneryInfo(bcc);//添加景点信息到景点表中
-                    int num1 = sceneryInfoService.addSceneryType(bcc);//添加景点资源特色到bx_subjectivity特色表中
+                    int num1 = sceneryInfoService.addSceneryType(bs);//添加景点资源特色到bx_subjectivity特色表中
                     if (num > 0 && num1 > 0) {
                         results.put("msg", "保存成功");
                         results.put("status", "success");

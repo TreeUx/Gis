@@ -29,6 +29,7 @@ function selectTraIdAndOpDeptidInfo() {
                 userId = data[0].id //当前用户id
                 console.log(data[0])
                 console.log(data[0].operate_id)
+                $("#search_userId").val(data[0].id) //当前用户id
                 $("#search_traId").val(data[0].tra_id) //旅行社id
                 $("#search_opDeptid").val(data[0].op_deptid) //运营部id
                 $("#search_operatorId").val(data[0].operate_id) //计调部操作员id
@@ -119,7 +120,8 @@ function selectUserPageInfo(currentPage) {
 
 //根据查询条件查询用户数据
 function searchUserInfo() {
-    var username = $("#search_username").val()
+    var username = $("#search_username").val() //用户名
+    var userId = $("#search_userId").val() //当前登录用户id
     var content = ""
     if (username == "") {
         selectUserInfo() //如果搜索条件为空，则查询所有结果
@@ -128,7 +130,8 @@ function searchUserInfo() {
             url: "searchUserInfo",
             type: "get",
             data: {
-                "username": username
+                "username": username,
+                "userId": userId
             },
             dataType: "json",
             success: function (data) {
@@ -172,6 +175,9 @@ function pages(datas) {
     console.log(datas)
     var content = ""
     var totalPage = parseInt(datas.length / 10) + 1 //总页数
+    if(datas.length % 10 == 0) {
+        totalPage = parseInt(datas.length / 10)
+    }
     var totalCount = datas.length //数据总条数
     // 调用分页器
     Pagination({

@@ -3,7 +3,7 @@ $(function () {
 })
 
 //发送验证码到邮箱
-var reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/ //验证邮箱有效性的正则
+var reg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/ //验证邮箱有效性的正则
 function getFreeCode() {
     var username = $("#register_username").val() //用户名
     var pswd = $("#register_pwd").val() //密码

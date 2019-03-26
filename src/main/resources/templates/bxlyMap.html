@@ -158,7 +158,10 @@
         }
 
         .BMap_pop div:nth-child(1) {
-            border-radius: 9px 0 0 0;
+            /*border-radius: 9px 0 0 0;*/
+            border-radius: 5px;
+            margin-top: 0;
+            border: 0;
         }
 
         .BMap_pop div:nth-child(3) div {
@@ -311,7 +314,9 @@
             text-align: center;
             padding: 6px;
             border: 1px solid #dddddd;
-            border-collapse: collapse
+            border-collapse: collapse;
+            margin-top: 100px;
+            margin-left: 250px;
         }
 
         #bxUserManageTable tr:nth-child(odd) {
@@ -325,7 +330,9 @@
         /*操作按钮样式 Start*/
         #operate_btn {
             margin: 20px 0 20px 35px;
-            float: left;
+            /*float: left;*/
+            position: fixed;
+            margin-left: 260px;
         }
 
         #operate_search {
@@ -486,6 +493,23 @@
             font-weight: bold;
         }
 
+        .li_fld_lah {
+            margin-top: 300px;
+            border: 0;
+            width: 20px;
+            margin-left: 145px;
+            list-style: none;
+        }
+        .li_fld_lah a {
+            text-decoration: none;
+            color: grey;
+            position: fixed;
+            z-index: 999;
+            font-size: 25px;
+        }
+        .li_fld_lah li:hover {
+            background: #666666;
+        }
 
         /*分页 Start*/
         #ele{padding: 20px;float: right}
@@ -629,6 +653,24 @@
         }
         /*分页 End*/
 
+        /*特色等级*/
+        .cstc{color:red;cursor: pointer;line-height: 36px}
+        .options{margin-top:1rem;padding:1rem}
+        .opselect>li{display:flex;justify-content: space-around;}
+        .imgload{text-align: center;display:none} .imgload img{width:2rem}
+        .oplever{margin:0}
+        .oplever>li{ padding:0 1rem;display:inline-flex;justify-content: space-between;width:100%;height:40px;line-height: 40px;}
+        .oplever>li>div{}
+        .starbox{width:75%;margin:0;}
+        .starbox>li{display:inline-block;width:15%;text-align: center;}
+        .starbox img{width:65%}
+
+        /*必填项弹出框样式修改 Start*/
+        .jconfirm.jconfirm-white .jconfirm-box {
+            width: 270px!important;
+        }
+        /*必填项弹出框样式修改 End*/
+
     </style>
     <!-- 加载高德地图JSAPI脚本 -->
     <script src="https://webapi.amap.com/maps?v=1.4.12&key=a96f1485c85033ab8c2e9b53538d4d54&plugin=AMap.Scale,AMap.ToolBar,AMap.OverView,AMap.ControlBar,AMap.CitySearch,AMap.Autocomplete,AMap.PlaceSearch"></script>
@@ -637,15 +679,18 @@
     <script type="text/javascript"
             src="http://api.map.baidu.com/api?v=2.0&ak=0NIuUlCTTGztFjaP8IPfhW12glBlcxH5"></script>
 
+
     <!--如果未引入webjars-locator，相关静态资源需要版本号，此处不便于升级-->
     <!--因为额外引入了webjars-locator，所以相关静态资源的引入可省略版本号便于升级-->
     <!--jquery-1.11.1-->
     <!--<script th:src="@{/js/jquery-1.11.0.min.js}" type="text/javascript"></script>-->
-    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet" type="text/javascript"/>
-    <!--<link th:href="@{/webjars/bootstrap-select/dist/css/bootstrap-select.min.css}" rel="stylesheet" />-->
     <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+
+    <!--<link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet" type="text/javascript"/>-->
+    <!--<link th:href="@{/webjars/bootstrap-select/dist/css/bootstrap-select.min.css}" rel="stylesheet" />-->
     <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
     <!--<script th:src="@{/webjars/bootstrap-select/dist/js/bootstrap-select.min.js}"></script>-->
+
 
     <!--swal提示框需要的样式-->
     <!--用以解决swal is not define问题-->
@@ -674,6 +719,7 @@
 
     <!-- 引入项目js -->
     <script th:src="@{/js/bxkj/common.js}" type="text/javascript"></script>
+    <script th:src="@{/js/bxkj/GlobalCity.js}" type="text/javascript"></script>
     <script th:src="@{/js/bxkj/bxMapInfo.js}" type="text/javascript"></script>
     <script th:src="@{/js/bxkj/bxGdMap.js}" type="text/javascript"></script>
     <script th:src="@{/js/bxkj/userManage.js}" type="text/javascript"></script>
@@ -683,7 +729,10 @@
     <!--DataTables-->
     <link type="text/css" rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css"/>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-
+    <!--特色等级 Start-->
+    <link rel="stylesheet" th:href="@{/css/H-ui.min.css}">
+    <script th:src="@{/js/H-ui.js}" type="text/javascript"></script>
+    <!--特色等级 End-->
 
     <title th:text="${name}"></title>
 
@@ -700,7 +749,13 @@
         <li index="1" class="bx_li_click"><a href="javascript:;">✧ 数据采集 ✧</a></li>
         <li index="2"><a href="javascript:;">✧ 账号管理 ✧</a></li>
     </ul>
+    <div>
+        <ul>
+            <li class="li_fld_lah"><a href="javascript:;"> 《 </a></li>
+        </ul>
+    </div>
 </div>
+
 <!--公共标题栏 End-->
 
 <!--采集工具 Start-->
@@ -769,6 +824,7 @@
     <div id="operate_search">
         <label for="">用户名：</label>
         <input id="search_username" style="width: 125px;height: 20px;" placeholder="请输入用户名">
+        <input id="search_userId" type="hidden">
         <input id="search_traId" type="hidden">
         <input id="search_opDeptid" type="hidden">
         <input id="search_operatorId" type="hidden">
@@ -824,7 +880,308 @@
 <!--清除浮动-->
 <div style="clear: both"></div>
 
+<!-- 特色等级 -->
+<div id="modal-cstc" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content radius">
+            <div class="modal-header">
+                <h3 class="modal-title"><i style="color:red;">*</i> 特色等级</h3>
+                <a class="close" data-dismiss="modal" aria-hidden="true" href="javascript:;">×</a>
+            </div>
+            <div class="modal-body">
+                <div class="options">
+                    <ul class="am-list oplever">
+                        <li class="fashion">
+                            <div>
+                                <label class="am-checkbox-inline">
+                                    <input type="checkbox" value="0" class="inpt_box" checked/>
+                                    时尚性
+                                </label>
+                            </div>
+                            <ul class="starbox">
+                                <li value="1"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="2"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="3" class="axis"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="4"><img src="/images/shoucang1.png" alt="" /></li>
+                                <li value="5"><img src="/images/shoucang1.png" alt="" /></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="am-list oplever">
+                        <li class="relex">
+                            <div>
+                                <label class="am-checkbox-inline">
+                                    <input type="checkbox" value="1" class="inpt_box" checked/>
+                                    休闲性
+                                </label>
+                            </div>
+                            <ul class="starbox">
+                                <li value="1"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="2"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="3" class="axis"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="4"><img src="/images/shoucang1.png" alt="" /></li>
+                                <li value="5"><img src="/images/shoucang1.png" alt="" /></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="am-list oplever">
+                        <li class="nos">
+                            <div>
+                                <label class="am-checkbox-inline">
+                                    <input type="checkbox" value="2" class="inpt_box" checked/>
+                                    历史性
+                                </label>
+                            </div>
+                            <ul class="starbox">
+                                <li value="1"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="2"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="3" class="axis"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="4"><img src="/images/shoucang1.png" alt="" /></li>
+                                <li value="5"><img src="/images/shoucang1.png" alt="" /></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="am-list oplever">
+                        <li class="romantic">
+                            <div>
+                                <label class="am-checkbox-inline">
+                                    <input type="checkbox" value="3" class="inpt_box" checked />
+                                    浪漫性
+                                </label>
+                            </div>
+                            <ul class="starbox">
+                                <li value="1"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="2"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="3" class="axis"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="4"><img src="/images/shoucang1.png" alt="" /></li>
+                                <li value="5"><img src="/images/shoucang1.png" alt="" /></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="am-list oplever">
+                        <li class="parentage">
+                            <div>
+                                <label class="am-checkbox-inline">
+                                    <input type="checkbox" value="4" class="inpt_box" checked />
+                                    亲子性
+                                </label>
+                            </div>
+                            <ul class="starbox">
+                                <li value="1"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="2"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="3" class="axis"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="4"><img src="/images/shoucang1.png" alt="" /></li>
+                                <li value="5"><img src="/images/shoucang1.png" alt="" /></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="am-list oplever">
+                        <li class="natural">
+                            <div>
+                                <label class="am-checkbox-inline">
+                                    <input type="checkbox" value="4" class="inpt_box" checked />
+                                    天然性
+                                </label>
+                            </div>
+                            <ul class="starbox">
+                                <li value="1"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="2"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="3" class="axis"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="4"><img src="/images/shoucang1.png" alt="" /></li>
+                                <li value="5"><img src="/images/shoucang1.png" alt="" /></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="am-list oplever">
+                        <li class="special">
+                            <div>
+                                <label class="am-checkbox-inline">
+                                    <input type="checkbox" value="4" class="inpt_box" checked />
+                                    新奇性
+                                </label>
+                            </div>
+                            <ul class="starbox">
+                                <li value="1"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="2"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="3" class="axis"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="4"><img src="/images/shoucang1.png" alt="" /></li>
+                                <li value="5"><img src="/images/shoucang1.png" alt="" /></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="am-list oplever">
+                        <li class="excit">
+                            <div>
+                                <label class="am-checkbox-inline">
+                                    <input type="checkbox" value="4" class="inpt_box" checked />
+                                    刺激性
+                                </label>
+                            </div>
+                            <ul class="starbox">
+                                <li value="1"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="2"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="3" class="axis"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="4"><img src="/images/shoucang1.png" alt="" /></li>
+                                <li value="5"><img src="/images/shoucang1.png" alt="" /></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="am-list oplever">
+                        <li class="culture">
+                            <div>
+                                <label class="am-checkbox-inline">
+                                    <input type="checkbox" value="4" class="inpt_box" checked />
+                                    人文性
+                                </label>
+                            </div>
+                            <ul class="starbox">
+                                <li value="1"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="2"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="3" class="axis"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="4"><img src="/images/shoucang1.png" alt="" /></li>
+                                <li value="5"><img src="/images/shoucang1.png" alt="" /></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="am-list oplever">
+                        <li class="watching">
+                            <div>
+                                <label class="am-checkbox-inline">
+                                    <input type="checkbox" value="4" class="inpt_box" checked />
+                                    舒适性
+                                </label>
+                            </div>
+                            <ul class="starbox">
+                                <li value="1"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="2"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="3" class="axis"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="4"><img src="/images/shoucang1.png" alt="" /></li>
+                                <li value="5"><img src="/images/shoucang1.png" alt="" /></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="am-list oplever">
+                        <li class="participate">
+                            <div>
+                                <label class="am-checkbox-inline">
+                                    <input type="checkbox" value="4" class="inpt_box" checked />
+                                    参与性
+                                </label>
+                            </div>
+                            <ul class="starbox">
+                                <li value="1"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="2"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="3" class="axis"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="4"><img src="/images/shoucang1.png" alt="" /></li>
+                                <li value="5"><img src="/images/shoucang1.png" alt="" /></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="am-list oplever">
+                        <li class="symbol">
+                            <div>
+                                <label class="am-checkbox-inline">
+                                    <input type="checkbox" value="4" class="inpt_box" checked />
+                                    独特性
+                                </label>
+                            </div>
+                            <ul class="starbox">
+                                <li value="1"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="2"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="3" class="axis"><img src="/images/shoucang.png" alt="" /></li>
+                                <li value="4"><img src="/images/shoucang1.png" alt="" /></li>
+                                <li value="5"><img src="/images/shoucang1.png" alt="" /></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary save-cstc">确定</button>
+                <button type="button" class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    /*特色等级选取*/
+
+    $(".inpt_box").on("change",function(){//复选框改变事件
+        var selnum=$(".options .inpt_box:checked").length;
+        var i=$(this).index(".inpt_box");
+        if(!$(this).prop("checked")){
+            $(this).parent().parent().parent().find("img").attr("src","/images/shoucang1.png")
+            $(this).parent().parent().parent().find(".starbox .axis").removeClass('axis')
+        }
+        if($(this).prop("checked")){
+            $(".options .oplever").eq(i).find(".starbox li").eq(2).find("img").attr("src","/images/shoucang.png");
+            $(".options .oplever").eq(i).find(".starbox li").eq(2).addClass("axis");
+            $(".options .oplever").eq(i).find(".starbox li").eq(2).prevAll().find("img").attr("src","/images/shoucang.png");
+        }
+
+    })
+    $(".starbox>li").on("click",function(){//点击星星
+        var ipt=$(this).parent().parent().find(".inpt_box");
+        var selnum=$(".options .inpt_box:checked").length;
+        if($(ipt).prop("checked")){
+            if(!$(this).is(".axis")){
+                $(this).removeClass("axis").siblings("li").removeClass("axis")
+                $(this).addClass("axis");
+                $(this).siblings("li").find("img").attr("src","/images/shoucang1.png");
+                $(this).find("img").attr("src","/images/shoucang.png");
+                $(this).prevAll().find("img").attr("src","/images/shoucang.png");
+            }else if($(this).is(".axis")&&$(this).val()!="1"){
+                $(this).removeClass("axis").siblings("li").removeClass("axis")
+                $(this).prev().addClass("axis");
+                $(this).find("img").attr("src","/images/shoucang1.png");
+                $(this).siblings("li").find("img").attr("src","/images/shoucang1.png");
+                //$(this).find("img").attr("src","/images/shoucang.png");
+                $(this).prevAll().find("img").attr("src","/images/shoucang.png");
+            }else if($(this).is(".axis")&&$(this).val()=="1"){
+                return
+            }
+
+        }
+    })
+    var fea={
+        // "product_id":parentid,
+        // "id": fea_id,
+        //"com_code":com_code,             //      商品编号
+        "epidemic":$(".fashion .axis").val()||0,       //int   流行性-对应等级
+        "recreational":$(".relex .axis").val()||0,   //int   休闲性-对应等级
+        "nostalgic":$(".nos .axis").val()||0,      //int   怀旧性-对应等级
+        "romantic":$(".romantic .axis").val()||0,       //int   浪漫性-对应等级
+        "parent_child":$(".parentage .axis").val()||0,   //int   亲子性-对应等级
+        "naturalness":$(".natural .axis").val()||0,    //int   自然性-对应等级
+        "singularity":$(".special .axis").val()||0,    //int   奇特性-对应等级
+        "excitement":$(".excit .axis").val()||0,     //int   刺激性-对应等级
+        "culture":$(".culture .axis").val()||0,        //int   文化性-对应等级
+        "ornamental":$(".watching .axis").val()||0,     //int   观赏性-对应等级
+        "participatory":$(".participate .axis").val()||0,  //int   参与性-对应等级
+        "iconic":$(".symbol .axis").val()||0          //int   标志性:对应等级
+    }
+    /*特色等级选取 End*/
+</script>
+
+
 <script type="text/javascript">
+    $(".li_fld_lah a").click(function(){ //展开折叠左侧标题栏
+        var text = $(".li_fld_lah a").text().trim()
+        if(text == "《") { //折叠
+            $("#bx_title").css("width","0")
+            $("#bx_title").css("margin-left","-165px")
+            $(".li_fld_lah a").css("margin-top","-205px")
+            $("#bx_bdmap").css("margin-left", "-10px")
+            $(".li_fld_lah a").text("》")
+        } else {
+            $("#bx_title").css("width","15%") //展开
+            $("#bx_title").css("margin-left","0")
+            $(".li_fld_lah a").css("margin-top","0")
+            $(".li_fld_lah a").css("margin-left","0")
+            $(".li_fld_lah a").text("《")
+        }
+    })
+
     $("#map_type_sel").on("change", function () { //监控切换地图
         mapType = $("select  option:selected").val() //获取选中的下拉选的值
         var queryValue = $("#input_name").val() //搜索框的值
@@ -892,10 +1249,13 @@
 
     // 当有文件添加进来的时候
     uploader.on('fileQueued', function (file) {
+        var fileName = new Date().getTime() + ".jpg"; //自定义上传图片的名称
+        $("#bx_bdmap").css("margin-top", "220px") //设置地图离页面顶部的距离
         var $li = $(
             '<div id="' + file.id + '" class="file-item thumbnail">' +
             '<img>' +
-            '<div class="info">' + file.name + '</div>' +
+            // '<div class="info">' + file.name + '</div>' +
+            '<div class="info">' + fileName + '</div>' +
             '<p class="state">等待上传...</p>' +
             '</div>'
             ),

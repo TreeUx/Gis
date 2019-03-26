@@ -26,13 +26,13 @@ public class MyCommandRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if(isOpen){
+        if(isOpen) {
             String cmd = googleExcutePath +" "+ loginUrl;
             Runtime run = Runtime.getRuntime();
-            try{
+            try {
                 run.exec(cmd);
                 logger.debug("启动浏览器打开项目成功");
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 logger.error(e.getMessage());
             }
