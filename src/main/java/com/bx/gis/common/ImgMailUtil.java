@@ -13,10 +13,10 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 /**
-  * @Author Breach
-  * @Description 发送图片及附件到email
-  * @Date 2019/2/22
-  */
+ * @Author Breach
+ * @Description 发送图片及附件到email
+ * @Date 2019/2/22
+ */
 public class ImgMailUtil {
     private static final String BX_CODE = "您好，感谢您使用伴行计调管理系统！本次验证码为：";
     // JavaMail需要Properties来创建一个session对象。它将寻找字符串"mail.smtp.host"，属性值就是发送邮件的主机.
@@ -25,6 +25,9 @@ public class ImgMailUtil {
         // properties.put("mail.smtp.host", "mailcas.chinapnr.com", "smtp.163.com");// 设置smtp主机
         properties.put("mail.smtp.host", "smtp.163.com");// 设置smtp主机
         properties.put("mail.smtp.auth", "true");// 使用smtp身份验证
+        //发送端口（根据实际情况填写，一般均为25）
+        //阿里云服务器禁用25端口，所以服务器上改为465端口
+        properties.put("mail.smtp.socketFactory.port", "465");
         /*
          * 在 JavaMail 中，可以通过 extends Authenticator 抽象类，在子类中覆盖父类中的
          * getPasswordAuthentication() 方法，就可以实现以不同的方式来进行登录邮箱时的用户身份认证。JavaMail
