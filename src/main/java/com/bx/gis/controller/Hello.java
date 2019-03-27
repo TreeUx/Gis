@@ -1,6 +1,7 @@
 package com.bx.gis.controller;
 
 import com.bx.gis.entity.BxCommodityCommon;
+import com.bx.gis.service.MailService;
 import com.bx.gis.service.TestHelloService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,9 @@ public class Hello {
 
     @Autowired
     TestHelloService testHelloService;
+
+    @Autowired
+    private MailService mailService;
 
     /*@RequestMapping("/index")
     public String hello(Model model) {
@@ -76,18 +80,17 @@ public class Hello {
         List<Map<String, Object>> list = testHelloService.queryDemo();
         System.out.println(list);
     }
-
+    @RequestMapping("/mail")
+    public void TestMail() {
+        System.out.println("开始测试");
+        String to = "1067747218@qq.com";
+        String subject = "伴行科技";
+        String content = "验证码测试";
+        boolean bl = mailService.sendSimpleMail(to, subject, content);
+        System.out.println("结束测试");
+    }
 
     public static void main(String[] args) {
-        for (int i = 1; i < 10; i++) {
-            for (int j = 1; j <= i; j++) {
-                System.out.print("i * j =" + i * j + "\t");
-                if(i == j) {
-                    System.out.println();
-                }
-            }
-
-        }
-
+        new Hello().TestMail();
     }
 }

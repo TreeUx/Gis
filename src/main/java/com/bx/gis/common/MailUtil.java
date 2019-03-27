@@ -24,10 +24,8 @@ public class MailUtil {
         //设置发送邮件的基本参数
         //发送邮件服务器(注意，此处根据你的服务器来决定，如果使用的是QQ服务器，请填写smtp.qq.com)
         properties.put("mail.smtp.host", "smtp.163.com");
-        //发送端口（根据实际情况填写，一般均为25）
-        //阿里云服务器禁用25端口，所以服务器上改为465端口
-        properties.put("mail.smtp.socketFactory.port", "465");
         properties.put("mail.smtp.auth", "true");
+
         //设置发送邮件的账号和授权码（授权码在邮箱设置里获取）
         Session session = Session.getInstance(properties, new Authenticator() {
             @Override
