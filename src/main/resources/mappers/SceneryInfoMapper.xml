@@ -26,11 +26,13 @@
     <insert id="addNewSceneryInfo" parameterType="com.bx.gis.entity.BxCommodityCommon">
       INSERT INTO
         bx_commodity (
-          com_code,com_name,com_type,state,province,city,com_address,com_central,com_duplex,
-          com_begining,com_moment,com_level,com_introduce,com_best,parentid
+          com_code,com_name,tra_id,bx_op_deptid,com_type,state,province,city,com_address,com_central,com_exit,
+          com_entrance,com_duplex,com_begining,com_moment,com_level,charge_type,com_introduce,com_img,com_best
+          ,com_shortest,com_longest,parentid,com_time
         ) VALUES (
-          #{comCode},#{comName},#{comType},#{state},#{province},#{city},#{comAddress},#{comCentral},#{comDuplex}
-          ,#{comBegining},#{comMoment},#{comLevel},#{comIntroduce},#{comBest},#{parentid}
+          #{comCode},#{comName},#{traId},#{bxOpDeptid},#{comType},#{state},#{province},#{city},#{comAddress},#{comCentral},#{comExit}
+          ,#{comEntrance},#{comDuplex},#{comBegining},#{comMoment},#{comLevel},#{chargeType},#{comIntroduce},#{comImg},#{comBest}
+          ,#{comShortest},#{comLongest},#{parentid},now()
         )
     </insert>
     <!-- 添加景点信息对应的资源特色 -->
@@ -48,19 +50,13 @@
     <!-- 根据商品code查询景区商品信息 -->
     <select id="querySceneryInfoByCode" resultType="java.util.Map">
         SELECT
-            com_code,
-            com_name,
-            state,
-            city,
-            com_address,
-            com_begining,
-            com_moment,
-            com_best,
-            com_level,
-            com_introduce,
-            com_central
+            com_code,com_name,state,city,com_address,com_entrance,com_exit,com_duplex,com_begining,com_moment,com_best,com_level,com_img,com_central,
+            epidemic,recreational,nostalgic,romantic,parent_child,naturalness,singularity,excitement,culture,ornamental,participatory,iconic
         FROM
             bx_commodity
+        LEFT JOIN
+            bx_subjectivity
+        ON com_code = product_id
         WHERE
             com_code = #{comCode}
     </select>
@@ -85,8 +81,8 @@
         FROM
           bx_commodity
         WHERE
-          com_code = #{arg1}
-          AND com_name = #{arg0}
+          com_code = #{com_code}
+          AND com_name = #{scenery_name}
     </select>
 
     <!-- 修改景点信息 -->
@@ -172,6 +168,16 @@
         WHERE
           username = #{username}
           AND password = #{password}
+    </select>
+
+    <!--根据id查询单品的介绍说明-->
+    <select id="queryIntroduceInfo" resultType="java.util.Map">
+      SELECT
+        com_introduce,com_address,tra_id,bx_op_deptid
+      FROM
+        bx_commodity
+      WHERE
+        id = #{parentid}
     </select>
 
 </mapper>

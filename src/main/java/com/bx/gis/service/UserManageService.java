@@ -39,4 +39,5 @@ public interface UserManageService {
     int saveFirstUserInfo(UUser user);
 
     List<UUser> selectUserPageInfo(Map<String, Object> para);
+
 }

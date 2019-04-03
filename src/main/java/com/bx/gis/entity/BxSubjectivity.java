@@ -14,29 +14,29 @@ public class BxSubjectivity {
     private int id;
     /*单品编号*/
     private String productId;
-    /*流行性-对应等级*/
+    /*时尚性-对应等级*/
     private int epidemic;
     /*休闲性-对应等级*/
     private int recreational;
-    /*怀旧性-对应等级*/
+    /*历史性-对应等级*/
     private int nostalgic;
     /*浪漫性-对应等级*/
     private int romantic;
     /*亲子性-对应等级*/
     private int parentChild;
-    /*自然性-对应等级*/
+    /*天然性-对应等级*/
     private int naturalness;
-    /*奇特性-对应等级*/
+    /*新奇性-对应等级*/
     private int singularity;
     /*刺激性-对应等级*/
     private int excitement;
-    /*文化性-对应等级*/
+    /*人文性-对应等级*/
     private int culture;
-    /*观赏性-对应等级*/
+    /*舒适性-对应等级*/
     private int ornamental;
     /*参与性-对应等级*/
     private int participatory;
-    /*标志性-对应等级*/
+    /*独特性-对应等级*/
     private int iconic;
 
 

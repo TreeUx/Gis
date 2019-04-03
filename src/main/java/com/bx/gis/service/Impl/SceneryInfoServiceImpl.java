@@ -159,4 +159,16 @@ public class SceneryInfoServiceImpl implements SceneryInfoService {
     public int checkPsw(Map<String, Object> para) {
         return sceneryInfoMapper.checkPsw(para);
     }
+
+    /**
+      * @Author Barton
+      * @Description 根据父类id查询单品的介绍说明
+      * @Date 2019/4/2
+      * @Param parentid
+      * @return java.lang.String
+      */
+    @Override
+    public List<Map<String, Object>> queryIntroduceInfo(int parentid) {
+        return sceneryInfoMapper.queryIntroduceInfo(parentid);
+    }
 }

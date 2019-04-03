@@ -40,4 +40,6 @@ public interface SceneryInfoMapper {
     List<Map<String, Object>> queryNewSceneryPartInfo(String parentid);
 
     int checkPsw(Map<String, Object> para);
+
+    List<Map<String, Object>> queryIntroduceInfo(int parentid);
 }

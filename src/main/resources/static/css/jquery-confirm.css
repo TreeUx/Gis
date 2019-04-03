@@ -444,6 +444,7 @@ body.jconfirm-noscroll {
 }
 .jconfirm.jconfirm-supervan .jconfirm-box .buttons {
   text-align: center;
+  width: 285px;
 }
 .jconfirm.jconfirm-supervan .jconfirm-box .buttons button {
   font-size: 16px;
@@ -452,7 +453,7 @@ body.jconfirm-noscroll {
   text-shadow: none;
   border: none;
   color: white;
-  padding: 10px;
+  padding: 6px;
   min-width: 100px;
 }
 .jconfirm.jconfirm-material .jconfirm-bg {

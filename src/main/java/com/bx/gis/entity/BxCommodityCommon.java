@@ -2,6 +2,7 @@ package com.bx.gis.entity;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -20,6 +21,12 @@ public class BxCommodityCommon {
     private String merAgency;
     /*国家编码*/
     private String comPassport;
+    /*旅行社机构id*/
+    private int traId;
+    /*收费类型：1-系统收费;2-自费;3-免费;*/
+    private int chargeType;
+    /*参考价*/
+    private BigDecimal referPrice;
     /*商品名称*/
     private String comName;
     /*商品类型*/
@@ -28,6 +35,10 @@ public class BxCommodityCommon {
     private String comQuantity;
     /*商品双向出入口坐标*/
     private String comDuplex;
+    /*商品出口坐标*/
+    private String comExit;
+    /*商品入口坐标*/
+    private String comEntrance;
     /*详细地址*/
     private String comAddress;
     /*服务起始时间*/
@@ -36,8 +47,14 @@ public class BxCommodityCommon {
     private Date comMoment;
     /*最佳游玩时长*/
     private int comBest;
-    /*单品介绍*/
+    /*最短时长*/
+    private int comShortest;
+    /*最长时长*/
+    private int comLongest;
+    /*单品介绍说明*/
     private String comIntroduce;
+    /*单品解说词*/
+    private String comImg;
     /*商品层级*/
     private String comLevel;
     /*国家*/

@@ -155,22 +155,29 @@ public class SceneryInfoController {
     public Map<String, Object> addNewSceneryInfo(HttpServletRequest request) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         Map<String, Object> results = new HashMap<>();
-        String comDuplex = ""; //双向出入口
+        String comIntroduce = ""; //单品的介绍说明
+        String comAddress = ""; //单品详细地址
         int parentid = Integer.parseInt("undefined".equals(request.getParameter("parentid")) ?"0":request.getParameter("parentid"));//父类id
         String com_code = request.getParameter("com_code");//商品代码
         String scenery_name = request.getParameter("scenery_name");//名称
+        int tra_id = Integer.parseInt(request.getParameter("modal_traId"));//旅行社id
+        int bx_op_deptid = Integer.parseInt(request.getParameter("modal_opDeptid"));//运营部Id
         String state = request.getParameter("continents");//国家
         String province = request.getParameter("state");//省份
         String city = request.getParameter("city");//城市
-        String scenery_address = request.getParameter("scenery_address");//详细地址
         int scenery_type = Integer.parseInt(request.getParameter("scenery_type"));//景点类型（暂未定）
-        String scenery_location = request.getParameter("scenery_location");//坐标
+        String scenery_location = request.getParameter("scenery_location");//中心点坐标
+        String comDuplex = request.getParameter("com_duplex"); //双向出入口
+        String comEntrance = request.getParameter("com_exit"); //出口
+        String comExit= request.getParameter("com_entrance"); //入口
         Date scenery_start_time = sdf.parse(request.getParameter("scenery_start_time"));//景区开放开始时间
         Date scenery_end_time = sdf.parse(request.getParameter("scenery_end_time"));//景区开放结束时间
         int com_best = Integer.parseInt(request.getParameter("com_best"));//最佳游玩时间
+        int com_shortest = (int) (com_best - com_best * 0.2); //最短时长
+        int com_longest = (int) (com_best + com_best * 0.2); //最长时长
         String bx_level = request.getParameter("bx_level");//伴行级别
-        String scenery_remark = request.getParameter("scenery_remark");//备注
-        String[] com_duplex = request.getParameterValues("com_duplex");
+        String scenery_remark = request.getParameter("scenery_remark");//解说词
+//        String[] com_duplex = request.getParameterValues("com_duplex");
         String character_type = request.getParameter("character_type"); //资源特色
         JSONObject characterJo = JSONObject.fromObject(character_type.toString());
         System.out.println(characterJo);
@@ -186,27 +193,41 @@ public class SceneryInfoController {
         int ornamental = Integer.parseInt(characterJo.get("ornamental").toString()); //观赏性
         int participatory = Integer.parseInt(characterJo.get("participatory").toString()); //参与性
         int iconic = Integer.parseInt(characterJo.get("iconic").toString()); //标志性
-        if(com_duplex != null && com_duplex.length != 0) {
+      /*  if(com_duplex != null && com_duplex.length != 0) {
             for (int i = 0; i < com_duplex.length; i++) { //双向出入口
                 comDuplex += (com_duplex[i] + " ");
             }
-        }
+        }*/
         BxCommodityCommon bcc = new BxCommodityCommon(); //商品实体类
         BxSubjectivity bs = new BxSubjectivity(); //资源特色实体类
         bcc.setParentid(parentid);
         bcc.setComName(scenery_name);
+        bcc.setTraId(tra_id); //旅行社id
+        bcc.setBxOpDeptid(bx_op_deptid); //运营部Id
         bcc.setState(state); //国家
         bcc.setProvince(province); //省份
         bcc.setCity(city); //城市
-        bcc.setComAddress(scenery_address);
-        bcc.setComCentral(scenery_location);
-        bcc.setComDuplex(comDuplex);
+        bcc.setComCentral(scenery_location); //中心点坐标
+        bcc.setComDuplex(comDuplex); //双向出入口
+        bcc.setComExit(comExit); //出口
+        bcc.setComEntrance(comEntrance); //入口
+        bcc.setComIntroduce(comIntroduce); //单品的介绍说明
+        bcc.setComAddress(comAddress); //详细地址
         bcc.setComBegining(scenery_start_time);
         bcc.setComMoment(scenery_end_time);
-        bcc.setComBest(com_best);
+        bcc.setComBest(com_best); //最佳游玩时长
+        bcc.setComShortest(com_shortest); //最短时长
+        bcc.setComLongest(com_longest); //最长时长
         bcc.setComLevel(bx_level);
-        bcc.setComIntroduce(scenery_remark);
+        bcc.setChargeType(3); //收费类型：3-免费
+        bcc.setComImg(scenery_remark); //单品的解说词
         bcc.setComType(scenery_type); //商品类型
+        if(parentid != 0) {
+            //根据父类id获取父类的介绍和地址信息
+            List<Map<String, Object>> list = sceneryInfoService.queryIntroduceInfo(parentid);
+            bcc.setComIntroduce(list.get(0).get("com_introduce").toString()); //单品的介绍说明
+            bcc.setComAddress(list.get(0).get("com_address").toString()); //详细地址
+        }
         //资源特色
         bs.setEpidemic(epidemic);
         bs.setRecreational(recreational);

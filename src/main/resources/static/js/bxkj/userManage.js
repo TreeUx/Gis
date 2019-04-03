@@ -33,6 +33,13 @@ function selectTraIdAndOpDeptidInfo() {
                 $("#search_traId").val(data[0].tra_id) //旅行社id
                 $("#search_opDeptid").val(data[0].op_deptid) //运营部id
                 $("#search_operatorId").val(data[0].operate_id) //计调部操作员id
+                $("#modal_traId").val(data[0].tra_id) //添加模态框中旅行社id
+                $("#modal_opDeptid").val(data[0].op_deptid) //添加模态框中运营部id
+                $("#modal_operatorId").val(data[0].operate_id) //添加模态框中计调部操作员id
+                User.id = data[0].id
+                User.tra_id = data[0].tra_id
+                User.op_deptid = data[0].op_deptid
+                User.operate_id = data[0].operate_id
                 console.log($("#search_operatorId").val())
             }
         },
@@ -172,7 +179,6 @@ function searchUserInfo() {
 
 /*分页 Start*/
 function pages(datas) {
-    console.log(datas)
     var content = ""
     var totalPage = parseInt(datas.length / 10) + 1 //总页数
     if(datas.length % 10 == 0) {
@@ -684,3 +690,10 @@ function SimpleDateFormat(pattern) {
     return fmt;
 }
 
+//JS传统方式下定义"类"
+function User(id,tra_id,op_deptid,operate_id) {
+    this.id = id;
+    this.tra_id = tra_id;
+    this.op_deptid = op_deptid;
+    this.operate_id = operate_id;
+}
