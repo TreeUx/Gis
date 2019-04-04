@@ -1429,7 +1429,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
     //右键菜单
     var content = '<div id="myModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true" >' +
         '<div class="modal-dialog">' +
-        '<div class="modal-content" style="width: 435px;height: 627px;">' +
+        '<div class="modal-content" style="width: 435px;height: 595px;">' +
         // '<div class="modal-header">' +
         //     '<h4 class="modal-title" id="addModalLabel" style="border-bottom: 1px solid #878787;padding-bottom: 15px;">新增景点</h4>' +
         // '</div>' +
@@ -1618,7 +1618,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
     var infoWindow = new BMap.InfoWindow(content, {
         offset: new BMap.Size(0, 0), //设置弹窗偏移量
         width: 430, //设置弹窗宽度
-        height: 660, //取值范围：0, 220 - 730。如果您指定宽度为0，则信息窗口的宽度将按照其内容自动调整
+        height: 600, //取值范围：0, 220 - 730。如果您指定宽度为0，则信息窗口的宽度将按照其内容自动调整
         enableAutoPan: true, //是否开启信息窗口打开时地图自动移动（默认开启）
         enableCloseOnClick: false //是否开启点击地图关闭信息窗口（默认开启）
         // title: "新增景点"
@@ -1639,6 +1639,21 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
 
     setTimeout(function () { //监听右键菜单框打开事件
         if (infoWindow.isOpen()) {   //添加景点窗口打开后，添加照片事件
+            /*添加添加模态框拖拽功能 Start*/
+            // map.addEventListener("dragend", function () { // 设置添加模态框可拖拽
+            //     var com_entrance = $("#com_entrance").val() // 拖拽前的入口
+            //     var com_exit = $("#com_exit").val() // 拖拽前的出口
+            //     var com_duplex = $("#com_duplex").val() // 拖拽前的双向出入口
+            //     console.log(map.getCenter())
+            //     map.openInfoWindow(infoWindow, map.getCenter()) //测试拖拽添加模态框
+            //     if(infoWindow.isOpen()) {
+            //         $("#com_entrance").val(com_entrance)
+            //         $("#com_exit").val(com_exit)
+            //         $("#com_duplex").val(com_duplex)
+            //     }
+            //     transedBdPoiToGpsPoi($("#enterance_exit_poi").val(), $("#poi_type").val())
+            // })
+            /*添加添加模态框拖拽功能 End*/
             // infoWindow.setContent(content)
             $("#city").val(city); //初始化城市下拉选
             $("#com_duplex").val(com_duplex); //初始化双向出入口坐标
