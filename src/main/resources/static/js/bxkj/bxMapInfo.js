@@ -178,13 +178,6 @@ $(function () {
         $("#modal-cstc").modal("hide") //隐藏特色星级模态框
     })
 
-   /* $("#modal-cstc").on("hidden.bs.modal", function () { //重置资源特色信息
-        $(".inpt_box").prop("checked", false);
-        $(".options").find("img").attr("src","/images/shoucang1.png");
-    });*/
-    $("#myModal").on("hidden.bs.modal", function() {
-        alert(111)
-    })
 }); /*主函数*/
 
 var timeStart, timeEnd, time;//申明全局变量
