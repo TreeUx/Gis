@@ -1526,8 +1526,8 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '<label for="poi_type" class="control-label"><span style="color: red;"> * </span>' +
         '<select id="poi_type" name="poi_type" class="selectpicker" onchange= "changePoiType()" style=";width: 70px;">' +
         '<option value="1" selected="selected">出入口</option>' +
-        '<option value="2">入口</option>' +
-        '<option value="3">出口</option>' +
+        '<option value="2">出口</option>' +
+        '<option value="3">入口</option>' +
         '</select>' +
         '</label>' +
         '</div>' +
@@ -1768,7 +1768,20 @@ function showInfo(e) {
     var lat = e.point.lat
     var poi_type = $("#poi_type").val()
     if (flag) { //添加开关防止鼠标多次事件
-        $("#enterance_exit_poi").val(lng + "," + lat)
+        switch (poi_type) { // 双向出入口支持单个坐标，出口和入口则支持多个坐标
+            case "1": // 双向出入口
+                $("#enterance_exit_poi").val(lng + "," + lat)
+                break
+            case "2": // 出口
+                $("#enterance_exit_poi").val($("#enterance_exit_poi").val()==""? (lng + "," + lat) : $("#enterance_exit_poi").val() + " " + lng + "," + lat)
+                break
+            case "3": // 入口
+                $("#enterance_exit_poi").val($("#enterance_exit_poi").val()==""? (lng + "," + lat) : $("#enterance_exit_poi").val() + " " + lng + "," + lat)
+                break
+            default:
+                $("#enterance_exit_poi").val(lng + "," + lat)
+                break
+        }
         flag = false
         transedBdPoiToGpsPoi($("#enterance_exit_poi").val(), poi_type) //赋值出入口坐标信息
         setTimeout(function () {
@@ -2594,7 +2607,6 @@ function fireKeyEvent(el, evtType, keyCode) {
         el.fireEvent('on' + evtType, evtObj);
     }
 }
-
 /*JS 模拟键盘鼠标点击 End*/
 
 //根据选择的国家查询省份下拉选信息
@@ -2650,29 +2662,55 @@ function queryCityInfo() {
 function transedBdPoiToGpsPoi(bd_poi, poi_type) { // bd_poi要转换的百度坐标,poi_type为出入口类型
     // var bd_poi = $("#enterance_exit_poi").val()
     var convertor = new BMap.Convertor()
-    var x = bd_poi.substring(0, bd_poi.indexOf(",")) //百度坐标系经度
-    var y = bd_poi.substring(bd_poi.indexOf(",") + 1, bd_poi.length) //百度坐标系纬度
-    var ggpoint = new BMap.Point(x, y)
     var pointArr = new Array()
-    pointArr.push(ggpoint)
+    if("1" == poi_type) { // 双向出入口
+        var x = bd_poi.substring(0, bd_poi.indexOf(",")) //百度坐标系经度
+        var y = bd_poi.substring(bd_poi.indexOf(",") + 1, bd_poi.length) //百度坐标系纬度
+        var ggpoint = new BMap.Point(x, y)
+        pointArr.push(ggpoint)
+    } else { //出口、入口
+        var locaArr = bd_poi.split(" ") // 切割多个坐标点
+        for (var i = 0; i < locaArr.length; i++) {
+            var x = locaArr[i].substring(0, locaArr[i].indexOf(",")) //百度坐标系经度
+            var y = locaArr[i].substring(locaArr[i].indexOf(",") + 1, locaArr[i].length) //百度坐标系纬度
+            var ggpoint = new BMap.Point(x, y)
+            pointArr.push(ggpoint)
+        }
+    }
+
     convertor.translate(pointArr, 5, 3, function (data) { //百度坐标系转换为国测局坐标系
         console.log(data)
-        var x1 = data.points[0].lng
-        var y1 = data.points[0].lat
-        var wgsPoint = gcj02towgs84(x1, y1)
-        console.log("百度坐标系转换为国测局（原始坐标系）坐标系 Start")
-        console.log(wgsPoint)
-        console.log(wgsPoint.lng.toFixed(10) + "," + wgsPoint.lat.toFixed(10))
-        console.log("百度坐标系转换为国测局（原始坐标系）坐标系 End")
+
         switch (poi_type) {
-            case "1":
+            case "1": // 双向出入口
+                var x1 = data.points[0].lng
+                var y1 = data.points[0].lat
+                var wgsPoint = gcj02towgs84(x1, y1)
+                console.log("百度坐标系转换为国测局（原始坐标系）坐标系 Start")
+                console.log(wgsPoint)
+                console.log(wgsPoint.lng.toFixed(10) + "," + wgsPoint.lat.toFixed(10))
+                console.log("百度坐标系转换为国测局（原始坐标系）坐标系 End")
                 $("#com_duplex").val(wgsPoint.lng.toFixed(10) + "," + wgsPoint.lat.toFixed(10))
                 break
-            case "2":
-                $("#com_exit").val(wgsPoint.lng.toFixed(10) + "," + wgsPoint.lat.toFixed(10))
+            case "2": // 出口
+                var finalExitPoi = ""
+                for (var i = 0; i < data.points.length; i++) {
+                    let x1 = data.points[i].lng
+                    let y1 = data.points[i].lat
+                    let wgsPoint = (gcj02towgs84(x1, y1))
+                    finalExitPoi += (wgsPoint.lng.toFixed(10) + "," + wgsPoint.lat.toFixed(10) + " ")
+                }
+                $("#com_exit").val(finalExitPoi) //多个转换后的出口坐标
                 break
-            case "3":
-                $("#com_entrance").val(wgsPoint.lng.toFixed(10) + "," + wgsPoint.lat.toFixed(10))
+            case "3": // 入口
+                var finalEntrancePoi = ""
+                for (var i = 0; i < data.points.length; i++) {
+                    let x1 = data.points[i].lng
+                    let y1 = data.points[i].lat
+                    let wgsPoint = gcj02towgs84(x1, y1)
+                    finalEntrancePoi += (wgsPoint.lng.toFixed(10) + "," + wgsPoint.lat.toFixed(10) + " ")
+                }
+                $("#com_entrance").val(finalEntrancePoi) //多个转换后的入口坐标
                 break
         }
     })
