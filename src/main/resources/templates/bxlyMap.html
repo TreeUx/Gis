@@ -65,7 +65,7 @@
         /*景区弹出框按钮样式 start*/
         .scenery-box-bt {
             text-align: center;
-            margin-top: 130px;
+            margin-top: -14px;
             position: fixed;
             margin-left: 140px;
         }
@@ -679,8 +679,9 @@
     <script src="https://webapi.amap.com/maps?v=1.4.12&key=a96f1485c85033ab8c2e9b53538d4d54&plugin=AMap.Scale,AMap.ToolBar,AMap.OverView,AMap.ControlBar,AMap.CitySearch,AMap.Autocomplete,AMap.PlaceSearch"></script>
 
     <!--加载百度地图脚本-->
-    <script type="text/javascript"
-            src="http://api.map.baidu.com/api?v=2.0&ak=0NIuUlCTTGztFjaP8IPfhW12glBlcxH5"></script>
+    <!--<script type="text/javascript"
+            src="https://api.map.baidu.com/api?v=2.0&ak=0NIuUlCTTGztFjaP8IPfhW12glBlcxH5"></script>-->
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=0NIuUlCTTGztFjaP8IPfhW12glBlcxH5"></script>
 
 
     <!--如果未引入webjars-locator，相关静态资源需要版本号，此处不便于升级-->
@@ -722,6 +723,8 @@
 
     <!-- 引入项目js -->
     <script th:src="@{/js/bxkj/common.js}" type="text/javascript"></script>
+    <script th:src="@{/js/layui.all.js}" type="text/javascript"></script>
+
     <script th:src="@{/js/bxkj/GlobalCity.js}" type="text/javascript"></script>
     <script th:src="@{/js/bxkj/bxMapInfo.js}" type="text/javascript"></script>
     <script th:src="@{/js/bxkj/bxGdMap.js}" type="text/javascript"></script>
@@ -734,6 +737,7 @@
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
     <!--特色等级 Start-->
     <link rel="stylesheet" th:href="@{/css/H-ui.min.css}">
+    <link rel="stylesheet" th:href="@{/css/layui.css}">
     <script th:src="@{/js/H-ui.js}" type="text/javascript"></script>
     <!--特色等级 End-->
 
@@ -774,16 +778,29 @@
                     <div class="info">景区导览图</div>
                 </div>-->
             </div>
-            <div>
-                <!--<div id="filePicker">选择图片</div>-->
-                <!--<input id="filePicker" type="file" class="webuploader-element-invisible">选择图片</input>-->
+            <!--<div>
+                &lt;!&ndash;<div id="filePicker">选择图片</div>&ndash;&gt;
+                &lt;!&ndash;<input id="filePicker" type="file" class="webuploader-element-invisible">选择图片</input>&ndash;&gt;
                 <div id="filePicker" class="webuploader-container">
                     <div class="webuploader-pick">选择图片</div>
                     <input type="file" name="file" class="webuploader-element-invisible"
                            accept="image/jpg,jpeg,bmp,png">
                 </div>
                 <button id="ctlBtn" class="btn btn-default" style="padding: 6px 12px;">开始上传</button>
+            </div>-->
+            <div class="layui-form-item">
+                <label class="layui-form-label"><i class="red" style="color:red">*</i>景区导览图:</label>
+                <div class="layui-input-block">
+                    <div class="layui-upload">
+                        <button type="button" class="layui-btn test1">上传图片</button>
+                        <div class="layui-upload-list">
+                            <img class="layui-upload-img demo1" style="border: 1px solid #63b963">
+                            <p class="demoText"></p >
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </div>
 
     </div>
@@ -1337,7 +1354,7 @@
         map.addControl(new BMap.NavigationControl());*/
         /*图层 End*/
 
-        map.centerAndZoom(cityName, 17);//初始化地图，设置地图级别
+        map.centerAndZoom(cityName, 16);//初始化地图，设置地图级别
         map.enableScrollWheelZoom(true);
         // 创建自定义控件实例
         var myZoomCtrl = new ZoomControl();
@@ -1430,6 +1447,36 @@
     var myCity = new BMap.LocalCity();
     myCity.get(myFun);
     //定位当前位置 end
+</script>
+
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+    layui.use('upload', function() {
+        var $ = layui.jquery
+            , upload = layui.upload;
+
+        //图片上传
+        upload.render({
+            elem: '.test1'
+            ,url: "http://118.89.49.148/travels/api/img_uploading/"
+            ,data:{
+
+                //   	"id":pro_id,
+                // "com_code":pro_code
+            }
+            ,done: function(res){
+                var item = this.item;
+                //上传完毕
+                console.log(res);
+                //layer.msg("上传成功！");
+                layer.msg(res.message);
+                cur_img=res.data.path;
+
+                $(item).siblings(".layui-upload-list").find('.demo1').attr('src', imgurl+res.data.path);
+                $(item).siblings(".layui-upload-list").find('.demo1').attr('imgUrl',res.data.path)
+            }
+        });
+    })
 </script>
 
 </body>

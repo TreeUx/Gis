@@ -50,15 +50,22 @@
     <!-- 根据商品code查询景区商品信息 -->
     <select id="querySceneryInfoByCode" resultType="java.util.Map">
         SELECT
-            com_code,com_name,state,city,com_address,com_entrance,com_exit,com_duplex,com_begining,com_moment,com_best,com_level,com_img,com_central,
-            epidemic,recreational,nostalgic,romantic,parent_child,naturalness,singularity,excitement,culture,ornamental,participatory,iconic
+            bc.id "id",bc.com_code "com_code",com_name,state,city,com_address,com_entrance,com_exit,com_duplex,com_begining,com_moment,com_best,com_level,com_img,com_central,
+            epidemic,recreational,nostalgic,romantic,parent_child,naturalness,singularity,excitement,culture,ornamental,participatory,iconic,bci.id 'imgId',
+	        bci.img_url 'imgUrl'
         FROM
-            bx_commodity
+            bx_commodity bc
         LEFT JOIN
-            bx_subjectivity
+            bx_subjectivity bs
         ON com_code = product_id
+        LEFT JOIN
+            bx_commo_img bci
+        ON bc.com_code = bci.com_code
         WHERE
-            com_code = #{comCode}
+            bc.com_code = #{comCode}
+            AND bc.del_state = "1"
+        GROUP BY
+            bc.com_code
     </select>
 
     <!-- 删除景区商品表及资源特色表中数据 -->
@@ -121,7 +128,7 @@
 --         AND com_level = 5
     </select>
 
-    <!-- 查询经典下所有新添加的景点数据，并以标记展示出来 -->
+    <!-- 查询景点下所有新添加的景点数据，并以标记展示出来 -->
     <select id="queryNewSceneryPartInfo" resultType="java.util.Map">
         SELECT
             parentid,
@@ -131,9 +138,11 @@
         FROM
             bx_commodity
         WHERE
-            parentid = #{parentid}
+            parentid = #{param1}
+        AND	collect_line_id = #{param2}
         AND com_central != ""
         AND com_central is not null
+        AND del_state = "1"
     </select>
 
     <!-- 查询景点下的所有路线的轨迹信息 -->

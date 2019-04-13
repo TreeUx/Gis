@@ -9,7 +9,7 @@ spring:
 #      #设定静态文件路径，js,css等
 #    static-path-pattern: /js/**
   profiles:
-    active: dev
+    active: test
   #thymeleaf start 模板引擎
   thymeleaf:
     # spring.thymeleaf.mode的默认值是HTML5，其实是一个很严格的检查，改为LEGACYHTML5可以得到一个可能更友好亲切的格式要求。

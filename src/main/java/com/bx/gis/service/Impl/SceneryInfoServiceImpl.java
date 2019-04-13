@@ -144,8 +144,8 @@ public class SceneryInfoServiceImpl implements SceneryInfoService {
     }
 
     @Override
-    public List<Map<String, Object>> queryNewSceneryPartInfo(String parentid) {
-        return sceneryInfoMapper.queryNewSceneryPartInfo(parentid);
+    public List<Map<String, Object>> queryNewSceneryPartInfo(String parentid, int collect_line_id) {
+        return sceneryInfoMapper.queryNewSceneryPartInfo(parentid, collect_line_id);
     }
 
     /**

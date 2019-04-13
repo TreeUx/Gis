@@ -29,7 +29,7 @@ public interface SceneryInfoService {
 
     int addPointlineInfos(Map<String, Object> params);
 
-    List<Map<String, Object>> queryNewSceneryPartInfo(String parentid);
+    List<Map<String, Object>> queryNewSceneryPartInfo(String parentid, int collect_line_id);
 
     int checkPsw(Map<String, Object> para);
 

@@ -15,9 +15,14 @@ var x_PI = 3.14159265358979324 * 3000.0 / 180.0;
 var PI = 3.1415926535897932384626;
 var a = 6378245.0;
 var ee = 0.00669342162296594323;
+var imgurl = "http://118.89.49.148/" //前缀
+var fea; // 特色资源
 /*坐标转换需要的常量 End*/
 var addLineClick; //鼠标点击事件
+var timeValid = true; // 鉴定时间有效性
+var groundOverlay; // 全局透明图层
 $(function () {
+
     /*测试百度坐标系转换为国测局（原始坐标系）坐标系 Start*/
     /* var convertor = new BMap.Convertor()
      var x = 115.264244
@@ -158,19 +163,19 @@ $(function () {
 
     //选择特色星级
     $(".save-cstc").on("click", function () {
-        var fea={
-            "ornamental":$(".watching .axis").val()||0,     //int   舒适性-对应等级
-            "culture":$(".culture .axis").val()||0,        //int   人文性-对应等级
-            "nostalgic":$(".nos .axis").val()||0,      //int   历史性-对应等级
-            "singularity":$(".special .axis").val()||0,    //int   新奇性-对应等级
-            "romantic":$(".romantic .axis").val()||0,       //int   浪漫性-对应等级
-            "epidemic":$(".fashion .axis").val()||0,       //int   时尚性-对应等级
-            "excitement":$(".excit .axis").val()||0,     //int   刺激性-对应等级
-            "recreational":$(".relex .axis").val()||0,   //int   休闲性-对应等级
-            "iconic":$(".symbol .axis").val()||0,          //int   独特性:对应等级,
-            "parent_child":$(".parentage .axis").val()||0,   //int   亲子性-对应等级
-            "naturalness":$(".natural .axis").val()||0,    //int   天然性-对应等级
-            "participatory":$(".participate .axis").val()||0  //int   参与性-对应等级
+        fea = {
+            "ornamental": $(".watching .axis").val() || 0,     //int   舒适性-对应等级
+            "culture": $(".culture .axis").val() || 0,        //int   人文性-对应等级
+            "nostalgic": $(".nos .axis").val() || 0,      //int   历史性-对应等级
+            "singularity": $(".special .axis").val() || 0,    //int   新奇性-对应等级
+            "romantic": $(".romantic .axis").val() || 0,       //int   浪漫性-对应等级
+            "epidemic": $(".fashion .axis").val() || 0,       //int   时尚性-对应等级
+            "excitement": $(".excit .axis").val() || 0,     //int   刺激性-对应等级
+            "recreational": $(".relex .axis").val() || 0,   //int   休闲性-对应等级
+            "iconic": $(".symbol .axis").val() || 0,          //int   独特性:对应等级,
+            "parent_child": $(".parentage .axis").val() || 0,   //int   亲子性-对应等级
+            "naturalness": $(".natural .axis").val() || 0,    //int   天然性-对应等级
+            "participatory": $(".participate .axis").val() || 0  //int   参与性-对应等级
         }
         console.log(JSON.stringify(fea))
         $("#character_type").val(JSON.stringify(fea)) //资源特色
@@ -178,7 +183,39 @@ $(function () {
         $("#modal-cstc").modal("hide") //隐藏特色星级模态框
     })
 
-}); /*主函数*/
+});
+/*主函数*/
+
+/*校验时间 Start*/
+function checkStartTime() {
+    console.log("开始时间失焦事件")
+    var title = "有效性提示"
+    var start_time = $("#com_begining").val()
+    var end_time = $("#com_moment").val()
+    if (!test_7($("#com_begining").val())) {
+        msg = "请输入有效时间"
+        showWarning(title, msg)
+    } else {
+        $("#com_moment").val(addMin(start_time, 0))
+    }
+}
+
+function checkEndTime() {
+    console.log("开始时间失焦事件")
+    var title = "有效性提示"
+    var start_time = $("#com_begining").val()
+    var end_time = $("#com_moment").val()
+    var ck_res = validateTimePeriod(start_time, end_time);
+    if (!test_7($("#com_moment").val())) {
+        msg = "请输入有效时间"
+        showWarning(title, msg)
+    } else if (!ck_res) {
+        var start_t = addMin(end_time, 1)
+        $("#com_begining").val(start_t)
+    }
+}
+
+/*校验时间 End*/
 
 var timeStart, timeEnd, time;//申明全局变量
 function getTimeNow() {//获取此刻时间
@@ -505,11 +542,10 @@ function bdFixedPosition() {
     function myFun(result) {
         var cityName = result.name;
         map.setCenter(cityName);
-        console.log("当前定位城市:" + cityName + ",坐标为：" + result.center.lng + "," + result.center.lat);
         var lng = result.center.lng
         var lat = result.center.lat
         // map.setMapStyle({style: 'light'});//设置地图样式 JavaScriptAPI V2.0 用法
-        map.centerAndZoom(cityName, 17);//初始化地图，设置地图级别
+        map.centerAndZoom(cityName, 16);//初始化地图，设置地图级别
 
         // 创建自定义控件实例
         var myZoomCtrl = new ZoomControl();
@@ -538,7 +574,7 @@ function queryMapInfo() {
                 map.removeEventListener("click", addLineClick) //重新查询后，移除鼠标单击事件
                 var m = document.getElementById('bx_bdmap'); //获取地图元素
                 console.log(m)
-                if(m.onmousedown != null || m.onmousedown != undefined) {
+                if (m.onmousedown != null || m.onmousedown != undefined) {
                     m.onmousedown = null //去除鼠标点击事件
                 }
                 break
@@ -573,7 +609,7 @@ function querySceneryInfo(scenery_name) {
                             matchSubset: true, //是否启用缓存
                             delay: 50, //指定在按键发生后多少毫秒后才触发执行自动完成
                             source: data,
-                            select: function(e, ui) { //Autocomplete的结果列表任意一项选中时，ui.item为选中的项
+                            select: function (e, ui) { //Autocomplete的结果列表任意一项选中时，ui.item为选中的项
                                 queryMapInfo() //选值后自动搜索景点地图数据
                             }
                         });
@@ -834,7 +870,7 @@ function querySceneryEntranceInfos(map, scenery_name) {
                         querySceneryTrackInfos(map, parentid, scenery_name) //查询景点内所有路线信息
                     } else {
                         enterAndExitArr = new Array() //初始化景点出入口数组
-                        map.centerAndZoom(scenery_name, 17);//初始化地图，设置地图级别
+                        map.centerAndZoom(scenery_name, 16);//初始化地图，设置地图级别
                     }
                 } else {
                     showSuccessOrErrorModal(data.msg, "error");
@@ -869,7 +905,7 @@ function showEntranceMarkImg(map, locaArray, parentid) {
             console.log(point)
             // 创建点坐标
             if (i == locaArray.length) {
-                map.centerAndZoom(point, 17);//map.getZoom()返回当前地图的缩放级别
+                map.centerAndZoom(point, 16);//map.getZoom()返回当前地图的缩放级别
             }
             var myIcon = new BMap.Icon("/images/tacked.png"
                 , new BMap.Size(45, 30) //设置可视面积//150 80
@@ -1065,7 +1101,10 @@ function showEntranceMarkImg(map, locaArray, parentid) {
     $.ajax({
         url: "queryNewSceneryPartInfo", //查询景点内所有新增单元坐标信息(展示标记)
         type: "post",
-        data: {"parentid": parentid},
+        data: {
+            "parentid": parentid,
+            "collect_line_id": User.id
+        },
         datatype: "json",
         success: function (data) {
             if (data.status == "success") {
@@ -1326,7 +1365,7 @@ function querySceneryTrackInfos(map, parentid, scenery_name) {
                         }
                     }
                 } else {
-                    map.centerAndZoom(scenery_name, 17);//初始化地图，设置地图级别
+                    map.centerAndZoom(scenery_name, 16);//初始化地图，设置地图级别
                 }
             },
             error: function (e) {
@@ -1366,7 +1405,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
     var com_img = "" //解说词
     var com_code = "" //商品code
     var scenery_character = "" //资源特色
-    var scenery_type = "" //类型
+    var com_type = "" //类型
     var com_duplex = "" //双向出入口
     var com_exit = "" //出口
     var com_entrance = "" //入口
@@ -1383,7 +1422,10 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
     var parent_child = 0 //亲子性
     var naturalness = 0 //天然性
     var participatory = 0 //参与性
+    var id = "" // 商品id
+    var imgUrl = "" // 图片地址
     if (data != undefined && data != null && data != "") {
+        id = data.id  // 商品id
         com_name = data.com_name
         state = data.state
         city = data.city
@@ -1394,12 +1436,14 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         com_level = data.com_level
         com_img = data.com_img
         com_code = data.com_code
-        com_central = data.com_central
-        lng = com_central.substring(0, com_central.indexOf(","))
-        lat = com_central.substring(com_central.indexOf(",") + 1, com_central.length)
+        com_central = data.com_central //出入口坐标
         com_entrance = data.com_entrance //入口
         com_exit = data.com_exit //出口
         com_duplex = data.com_duplex //双向出入口
+        com_central = (com_central == "" || com_central == null) ? com_duplex : com_central
+        lng = com_central.substring(0, com_central.indexOf(","))
+        lat = com_central.substring(com_central.indexOf(",") + 1, com_central.length)
+        imgUrl = data.imgUrl //图片地址
         /*资源特色*/
         ornamental = data.ornamental //舒适性
         culture = data.culture //人文性
@@ -1439,12 +1483,19 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '<div class="row" style="padding: 10px;margin-top:-5px;">' +
         '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;margin-left: 25px;">' +
-        '<label for="scenery_name" class="control-label"><span  style="color: red;"> * </span>名称：</label>' +
+        '<label for="com_name" class="control-label"><span  style="color: red;"> * </span>名称：</label>' +
         '</div>' +
         '<div class="">' +
-        '<input id="modal_traId" name="modal_traId" value="" type="hidden">' +
-        '<input id="modal_opDeptid" name="modal_opDeptid" value="" type="hidden">' +
-        '<input id="scenery_name" name="scenery_name" type="text" style="margin-left: -5px;padding: 3px;" value="' + com_name + '" placeholder="请输入景点名称"/>' +
+        '<input id="tra_id" name="tra_id" value="" type="hidden">' +
+        /*商品id*/
+        '<input id="id" name="id" value="' + id + '" type="hidden">' +
+        /*采线员Id*/
+        '<input id="collect_line_id" name="collect_line_id" type="hidden" value="' + User.id + '"/>' +
+        '<input id="bx_op_deptid" name="bx_op_deptid" value="" type="hidden">' +
+        '<input id="parentid" name="parentid" type="hidden" value="' + parentid + '"/>' +
+        '<input id="com_central" name="com_central" type="hidden" value="' + lng + "," + lat + '"/>' +
+        '<input id="com_code" name="com_code" type="hidden" value="' + com_code + '"/>' +
+        '<input id="com_name" name="com_name" type="text" style="margin-left: -5px;padding: 3px;" value="' + com_name + '" placeholder="请输入景点名称"/>' +
         '</div>' +
         '</div>' +
         '</div>' +
@@ -1492,10 +1543,10 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '<div class="row" style="padding: 5px;">' +
         '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;margin-left: 30px;">' +
-        '<label for="scenery_type" class="control-label"><span  style="color: red;"> * </span>类型：</label>' +
+        '<label for="com_type" class="control-label"><span  style="color: red;"> * </span>类型：</label>' +
         '</div>' +
         '<div class="">' +
-        '<select id="scenery_type" name="scenery_type" class="selectpicker"  style="margin-left: -5px;width: 80px;">' +
+        '<select id="com_type" name="com_type" class="selectpicker"  style="margin-left: -5px;width: 80px;">' +
         '<option value="1" selected="selected">1. 吃</option>' +
         '<option value="2">2. 住</option>' +
         '<option value="3">3. 行</option>' +
@@ -1511,9 +1562,6 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '<div class="col-sm-3" style="float: left;">' +
         '<label for="" class="control-label">地图经纬度：</label>' +
         '</div>' +
-        '<input id="parentid" name="parentid" type="hidden" value="' + parentid + '"/>' +
-        '<input id="scenery_location" name="scenery_location" type="hidden" value="' + lng + "," + lat + '"/>' +
-        '<input id="com_code" name="com_code" type="hidden" value="' + com_code + '"/>' +
         '<div class="col-sm-9"><label id="location" style="margin-left: 10px;">' + ("新增景点" == title ? lng : updateLng) + "," + ("新增景点" == title ? lat : updateLat) + '</label></div>' +
         '</div>' +
         '</div>' +
@@ -1549,11 +1597,11 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '<div class="row" style="padding: 5px;">' +
         '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;">' +
-        '<label for="scenery_start_time scenery_end_time" class="control-label"><span  style="color: red;"> * </span>开放时段：</label>' +
+        '<label for="com_begining com_moment" class="control-label"><span  style="color: red;"> * </span>开放时段：</label>' +
         '</div>' +
         '<div class="col-sm-9">' +
-        '<input id="scenery_start_time" name="scenery_start_time" type="time" value="' + com_begining + '" style="width: 70px;margin-left: 10px;"/> ~ &nbsp;&nbsp;&nbsp; ' +
-        '<input id="scenery_end_time" name="scenery_end_time" type="time" value="' + com_moment + '" style="width: 70px;" />' +
+        '<input id="com_begining" name="com_begining" onblur="checkStartTime()" type="time" value="' + com_begining + '" style="width: 70px;margin-left: 10px;"/> ~ &nbsp;&nbsp;&nbsp; ' +
+        '<input id="com_moment" onblur="checkEndTime()" name="com_moment" type="time" value="' + com_moment + '" style="width: 70px;" />' +
         '</div>' +
         '</div>' +
         '</div>' +
@@ -1586,20 +1634,32 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '<label for="" class="control-label">解说词：</label>' +
         '</div>' +
         '<div class="">' +
-        '<textarea id="scenery_remark" name="scenery_remark" rows="3" cols="20" style="margin-left: -15px;">' + com_img + '</textarea>' +
+        '<textarea id="com_img" name="com_img" rows="3" cols="20" style="margin-left: -15px;">' + com_img + '</textarea>' +
         '</div>' +
         '</div>' +
         '</div>' +
         '<div class="row" style="padding: 5px;">' +
         '<div class="form-group" style="width: 456px;">' +
         '<div class="col-sm-3" style="float: left;margin-left: 10px;">' +
-        '<label class="control-label"></span>上传图片：</label>' +
+        // '<label class="control-label"></span>上传图片：</label>' +
+        '<div class="layui-form-item">' +
+        '                <label class="layui-form-label"><i class="red" style="color:red">*</i>景区图片 :</label>' +
+        '                <div class="layui-input-block">' +
+        '                    <div class="layui-upload">' +
+        '                        <button type="button" class="layui-btn test2">上传图片</button>' +
+        '                        <div class="layui-upload-list">' +
+        '                            <img class="layui-upload-img demo2" style="width: 200px;height: 125px;border: 1px solid #63b963" />' +
+        '                            <p class="demoText"></p >' +
+        '                        </div>' +
+        '                    </div>' +
+        '                </div>' +
+        '            </div>' +
         '</div>' +
         /*图片上传开始部分*/
-        '<div id="uploader-image">' +
-        '<div id="filePicker1">选择图片</div>' +
-        '<div id="fileList1" class="uploader-list" style="padding: 5px;"></div>' +
-        '</div>' +
+        /* '<div id="uploader-image">' +
+         '<div id="filePicker1">选择图片</div>' +
+         '<div id="fileList1" class="uploader-list" style="padding: 5px;"></div>' +
+         '</div>' +*/
         /*图片上传结束部分*/
         '</div>' +
         '</div>' +
@@ -1618,7 +1678,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
     var infoWindow = new BMap.InfoWindow(content, {
         offset: new BMap.Size(0, 0), //设置弹窗偏移量
         width: 430, //设置弹窗宽度
-        height: 600, //取值范围：0, 220 - 730。如果您指定宽度为0，则信息窗口的宽度将按照其内容自动调整
+        height: 610, //取值范围：0, 220 - 730。如果您指定宽度为0，则信息窗口的宽度将按照其内容自动调整
         enableAutoPan: true, //是否开启信息窗口打开时地图自动移动（默认开启）
         enableCloseOnClick: false //是否开启点击地图关闭信息窗口（默认开启）
         // title: "新增景点"
@@ -1630,15 +1690,40 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
     // console.log(infoWindow.isOpen())
 
     //监听添加窗口的关闭事件
-    infoWindow.addEventListener('close', function(e){
+    infoWindow.addEventListener('close', function (e) {
         // 重置资源特色星级选择信息
         $(".inpt_box").prop("checked", false);
-        $(".options").find("img").attr("src","/images/shoucang1.png");
+        $(".options").find("img").attr("src", "/images/shoucang1.png");
         $(".options").find(".starbox .axis").removeClass('axis')
     });
 
     setTimeout(function () { //监听右键菜单框打开事件
         if (infoWindow.isOpen()) {   //添加景点窗口打开后，添加照片事件
+            layui.use('upload', function () {
+                var $ = layui.jquery
+                    , upload = layui.upload;
+
+                //图片上传
+                upload.render({
+                    elem: '.test2'
+                    , url: imgurl + "travels/api/img_uploading/"
+                    , data: {
+                        //   	"id":pro_id,
+                        // "com_code":pro_code
+                    }
+                    , done: function (res) {
+                        var item = this.item;
+                        //上传完毕
+                        console.log(res);
+                        //layer.msg("上传成功！");
+                        layer.msg(res.message);
+                        cur_img = res.data.path;
+
+                        $(item).siblings(".layui-upload-list").find('.demo2').attr('src', imgurl + res.data.path);
+                        $(item).siblings(".layui-upload-list").find('.demo2').attr('imgUrl', res.data.path)
+                    }
+                });
+            })
             /*添加添加模态框拖拽功能 Start*/
             // map.addEventListener("dragend", function () { // 设置添加模态框可拖拽
             //     var com_entrance = $("#com_entrance").val() // 拖拽前的入口
@@ -1659,21 +1744,23 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
             $("#com_duplex").val(com_duplex); //初始化双向出入口坐标
             $("#com_exit").val(com_exit); //初始化出口坐标
             $("#com_entrance").val(com_entrance); //初始化入口坐标
-            if("修改景点" == title) {
+            $(".demo2").attr("src", imgUrl == "" ? imgUrl : imgurl + imgUrl) // 设置图片地址
+            $(".demo2").attr("imgurl", imgUrl) // 设置imgurl图片属性
+            if ("修改景点" == title) {
                 $("#poi_div").css("display", "none") //隐藏出入口div
-                var fea={
-                    "ornamental":ornamental,     //int   舒适性-对应等级
-                    "culture":culture,        //int   人文性-对应等级
-                    "nostalgic":nostalgic,      //int   历史性-对应等级
-                    "singularity":singularity,    //int   新奇性-对应等级
-                    "romantic":romantic,       //int   浪漫性-对应等级
-                    "epidemic":epidemic,       //int   时尚性-对应等级
-                    "excitement":excitement,     //int   刺激性-对应等级
-                    "recreational":recreational,   //int   休闲性-对应等级
-                    "iconic":iconic,          //int   独特性:对应等级,
-                    "parent_child":parent_child,   //int   亲子性-对应等级
-                    "naturalness":naturalness,    //int   天然性-对应等级
-                    "participatory":participatory  //int   参与性-对应等级
+                fea = {
+                    "ornamental": ornamental,     //int   舒适性-对应等级
+                    "culture": culture,        //int   人文性-对应等级
+                    "nostalgic": nostalgic,      //int   历史性-对应等级
+                    "singularity": singularity,    //int   新奇性-对应等级
+                    "romantic": romantic,       //int   浪漫性-对应等级
+                    "epidemic": epidemic,       //int   时尚性-对应等级
+                    "excitement": excitement,     //int   刺激性-对应等级
+                    "recreational": recreational,   //int   休闲性-对应等级
+                    "iconic": iconic,          //int   独特性:对应等级,
+                    "parent_child": parent_child,   //int   亲子性-对应等级
+                    "naturalness": naturalness,    //int   天然性-对应等级
+                    "participatory": participatory  //int   参与性-对应等级
                 }
                 console.log(JSON.stringify(fea))
                 $("#character_type").val(JSON.stringify(fea)) //资源特色
@@ -1682,9 +1769,9 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
             transedBdPoiToGpsPoi($("#enterance_exit_poi").val(), $("#poi_type").val())
             // $("#state").val(0); //初始化国家下拉选
             // $("#scenery_character").val(0); //初始化资源特色下拉选
-            $("#modal_traId").val(User.tra_id) //设置旅行社Id
-            $("#modal_opDeptid").val(User.op_deptid) //设置运营部Id
-            $("#scenery_type").val(1); //初始化类型下拉选
+            $("#tra_id").val(User.tra_id) //设置旅行社Id
+            $("#bx_op_deptid").val(User.op_deptid) //设置运营部Id
+            $("#com_type").val(1); //初始化类型下拉选
             listenTitleShow();
 
             // $('#myModal').draggable(); //设置模态框可以拖拽
@@ -1710,7 +1797,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
                         var y = 2 * y1 - y2
                         x = x.toFixed(10)
                         y = y.toFixed(10)
-                        $("#scenery_location").val(x + "," + y)
+                        $("#com_central").val(x + "," + y)
                     }
                 })
             }
@@ -1742,10 +1829,12 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         }
     }, 50);
 }
+
 //展示特色星级选择模态框
 function showStarModal() {
     $("#modal-cstc").modal("show")
 }
+
 //监听添加模态框中出入口下拉选改变事件
 function changePoiType() {
     $("#enterance_exit_poi").val("") //重置采集的坐标点信息
@@ -1776,6 +1865,7 @@ var flag = true;
         }, 50)
     }
 }*/
+
 //添加转换后的坐标信息
 function showInfo(e) {
     console.log(e.point.lng + ", " + e.point.lat);
@@ -1788,10 +1878,10 @@ function showInfo(e) {
                 $("#enterance_exit_poi").val(lng + "," + lat)
                 break
             case "2": // 出口
-                $("#enterance_exit_poi").val($("#enterance_exit_poi").val()==""? (lng + "," + lat) : $("#enterance_exit_poi").val() + " " + lng + "," + lat)
+                $("#enterance_exit_poi").val($("#enterance_exit_poi").val() == "" ? (lng + "," + lat) : $("#enterance_exit_poi").val() + " " + lng + "," + lat)
                 break
             case "3": // 入口
-                $("#enterance_exit_poi").val($("#enterance_exit_poi").val()==""? (lng + "," + lat) : $("#enterance_exit_poi").val() + " " + lng + "," + lat)
+                $("#enterance_exit_poi").val($("#enterance_exit_poi").val() == "" ? (lng + "," + lat) : $("#enterance_exit_poi").val() + " " + lng + "," + lat)
                 break
             default:
                 $("#enterance_exit_poi").val(lng + "," + lat)
@@ -1948,8 +2038,11 @@ function submitSceneryInfo(e) {//lng, lat为当前点击的点的经纬度坐标
     var duplex_poi = $("#com_duplex").val() //双向出入口坐标
     var exit_poi = $("#com_exit").val() //出口坐标
     var enterance_poi = $("#com_entrance").val() //入口坐标
+    var start_time = $("#com_begining").val()
+    var start_time = $("#com_begining").val()
+
     //表单验证
-    if ($("#scenery_name").val() == "") {//景点名称
+    if ($("#com_name").val() == "") {//景点名称
         msg = "请输入景点名称"
         showWarning(title, msg)
     } else if (continents == "" && $("#continents").find("option").length != 0) {//国家
@@ -1964,16 +2057,19 @@ function submitSceneryInfo(e) {//lng, lat为当前点击的点的经纬度坐标
     } else if ($("#character_type").val() == "" || $(".options .inpt_box:checked").length == 0) {//景点特色
         msg = "请选择资源特色"
         showWarning(title, msg)
-    } else if ($("#scenery_type").val() == "") {//类型
+    } else if ($("#com_type").val() == "") {//类型
         msg = "请选择类型"
         showWarning(title, msg)
     } else if (duplex_poi == "" && exit_poi == "" && enterance_poi == "") {//出入口坐标
         msg = "请采集出入口坐标"
         showWarning(title, msg)
-    } else if ($("#scenery_start_time").val() == "") {//开放时间
+    } else if ($("#com_begining").val() == "") {//开放时间
         msg = "请输入开放时间"
         showWarning(title, msg)
-    } else if ($("#scenery_end_time").val() == "") {//开放时间
+    } else if (!test_7($("#com_begining").val()) || !test_7($("#com_moment").val())) {
+        msg = "请输入有效时间"
+        showWarning(title, msg)
+    } else if ($("#com_moment").val() == "") {//开放时间
         msg = "请输入开放时间"
         showWarning(title, msg)
     } else if ($("#com_best").val() == "") {//最佳游玩时间
@@ -1994,23 +2090,72 @@ function submitSceneryInfo(e) {//lng, lat为当前点击的点的经纬度坐标
  * @Date 2018/12/19
  */
 function saveNewSceneryInfo(e) {
+    // console.log($("#addSceneryModalForm").serializeArray())
+    // console.log(JSON.stringify($("#addSceneryModalForm").serializeArray()))
+    // console.log($("#addSceneryModalForm").serializeObject())
+    // console.log(JSON.stringify($("#addSceneryModalForm").serializeObject()))
+    var bxcommodity = {
+        "bx_op_deptid": $("#bx_op_deptid").val(),
+        "tra_id": $("#tra_id").val(),
+        "id": $("#id").val(), // 商品id
+        "mer_id": "",
+        "parent_id": parentid, // 父类Id
+        "com_type": $("#com_type").val(),
+        //"com_type": mer_req.mer_type,
+        "charge_type": 1, // 收费类型
+        "refer_price": 10, // 参考价格
+        "com_name": $("#com_name").val(),
+        "com_location": "",
+        "com_entrance": $("#com_entrance").val(),
+        "com_com_exit": $("#com_name").val(),
+        "com_duplex": $("#com_duplex").val(),
+        "com_img": $("#com_img").val(),
+        "com_introduce": $("#com_img").val(),
+        "com_begining": $("#com_begining").val(),
+        "com_moment": $("#com_moment").val(),
+        //"com_best": mer_req.mer_best,
+        "com_best": $("#com_best").val(),
+        "com_shortest": parseInt($("#com_best").val()) - parseInt($("#com_best").val()) * 0.2,
+        "com_longest": parseInt($("#com_best").val()) + parseInt($("#com_best").val()) * 0.2,
+        "com_central": $("#com_central").val(),
+        "com_address": $("#com_address").val(),
+        "com_level": $("#com_level").val(),
+        "state": $("#continents").val(),
+        "province": $("#state").val(),
+        "city": $("#city").val(),
+        "district": $("#city").val(),
+        "collect_line_id": $("#collect_line_id").val()
+    }
+    img = {
+        "id": $(".demo2").attr("imgId") ? $(".demo2").attr("imgId") : "",
+        "imgurl": $(".demo2").attr("imgurl")
+    }
+    pro_req = {
+        "img": img,
+        "bxcommodity": bxcommodity,
+        "cfeature": fea
+    }
+    console.log(JSON.stringify(pro_req))
     $.ajax({
-        url: "addNewSceneryInfo",
-        type: "post",
-        data: $("#addSceneryModalForm").serialize(),
+        // url: "addNewSceneryInfo",
+        url: imgurl + "travels/api/commdity_group/",
+        type: "POST",
         dataType: "json",
+        data: JSON.stringify(pro_req),
+        contentType: "application/json;utf-8",
         success: function (data) {
-            if (data.status == "success") {
+            if (data.result == 200) {
                 console.log(data)
+                console.log(data.data.com_code)
                 map.closeInfoWindow()
-                showSuccessOrErrorModal(data.msg, "success");//保存成功后，需要添加一个标记点
-                var comCode = data.comCode;//获取保存的景点的商品编码
-                var lng = data.lng //转换后的坐标
-                var lat = data.lat//转换后的坐标
+                showSuccessOrErrorModal(data.message, "success");//保存成功后，需要添加一个标记点
+                var comCode = data.data.com_code;//获取保存的景点的商品编码
+                var lng = $("#com_central").val().substring(0, $("#com_central").val().indexOf(",")) //转换后的坐标
+                var lat = $("#com_central").val().substring($("#com_central").val().indexOf(",") + 1, $("#com_central").val().indexOf(",").length)//转换后的坐标
                 addMarkImg(map, lng, lat, comCode, e);//添加标记
                 removeClick() // 移除鼠标点击事件
             } else {
-                showSuccessOrErrorModal(data.msg, "error");
+                showSuccessOrErrorModal(data.message, "error");
             }
         },
         error: function (e) {
@@ -2018,6 +2163,25 @@ function saveNewSceneryInfo(e) {
         }
     });
 }
+
+/**
+ * 自动将form表单封装成json对象
+ */
+$.fn.serializeObject = function () {
+    var o = {};
+    var a = this.serializeArray();
+    $.each(a, function () {
+        if (o[this.name]) {
+            if (!o[this.name].push) {
+                o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || '');
+        } else {
+            o[this.name] = this.value || '';
+        }
+    });
+    return o;
+};
 
 var flag = true
 
@@ -2106,12 +2270,14 @@ function updateSceneryInfo(map, lng, lat, title, marker) {
     var comCode = marker.customData.myProperty
     $.ajax({
         url: "querySceneryInfoByCode",
-        type: "post",
+        // url: imgurl + "travels/api/commdity_details/",
+        type: "get",
         data: {"comCode": comCode},
         dataType: "json",
         success: function (data) {
-            if (data.status == "success") {
+            if (data.status == 200) {
                 data = data.sceneryInfoList[0];
+                // data = data.data.bxcommodity;
                 console.log(data)
                 addNewSceneryInfos(map, lng, lat, title, data, marker); //弹出修改菜单框
             } else {
@@ -2177,7 +2343,7 @@ var polyline;
 function startToDraw(map, pointList, different_text) {//map当前的图层
     var pointListY = new Array()
     // pointList.length = 0 //清空点数组
-    if(enterAndExitArr.length != 0) {
+    if (enterAndExitArr.length != 0) {
         listenMouseClick(map, pointList, pointListY, different_text) //设置采点水纹特效（探测出入口）
     }
     addLineClick = function (e) {//设置鼠标左键点击事件
@@ -2511,7 +2677,7 @@ function createOverlayAndLine(map, pointList) {
             , {
                 strokeColor: "red",
                 strokeWeight: 2,
-                strokeOpacity: 0.5,
+                strokeOpacity: 0.3,
                 icons: [icons],
                 strokeWeight: '8',//折线的宽度，以像素为单位
                 strokeStyle: "dashed"
@@ -2521,23 +2687,52 @@ function createOverlayAndLine(map, pointList) {
     }
 }
 
-function showMapOverlay(e) {
-    var attr = $(e).attr("showAndHide")
-    if ("show" == attr) {
-        $(e).attr("showAndHide", "hide")
-    } else {
-        $(e).attr("showAndHide", "show")
-    }
-}
-
 /*添加自定义图层 Start*/
 function addCustomOverlay(map) {
-    var pt = new BMap.Point(114.066112, 22.548515);
-    var myIcon = new BMap.Icon("/_upload/5c8a714786ea4b7a923c70446c174f0e.jpg", new BMap.Size(900, 480));
-    var marker = new BMap.Marker(pt, {icon: myIcon});
-    map.addOverlay(marker);
-}
+    console.log(map.getBounds().Ce + "," + map.getBounds().Pd) // 东北角
+    console.log(map.getBounds().He + "," + map.getBounds().Rd) // 西南角
+    // 西南角和东北角
+    var SW = new BMap.Point(map.getBounds().He, map.getBounds().Rd);
+    var NE = new BMap.Point(map.getBounds().Ce, map.getBounds().Pd);
+    groundOverlayOptions = {
+        // imageURL: $(".demo1").attr("src"), // 图层的图片地址
+        opacity: 0.3, //设置透明度
+        displayOnMinLevel: 10, // 最小缩放级别
+        displayOnMaxLevel: 22 // 最大缩放级别
+    }
+    // 初始化GroundOverlay
+    groundOverlay = new BMap.GroundOverlay(new BMap.Bounds(SW, NE), groundOverlayOptions);
+    // 设置GroundOverlay的图片地址
+    groundOverlay.setImageURL($(".demo1").attr("src"));
+    // 单击事件
+    groundOverlay.addEventListener('click', function (clickEvent) {
+        console.log('导览图区域被单击');
+    });
 
+    // 双击事件dblclick
+    // 右击事件
+    groundOverlay.addEventListener('rightclick', function (dblclickEvent) {
+        console.log('导览图区域被双击');
+        addClickFun(map) // 添加右键菜单
+    });
+    groundOverlay.disableMassClear() // 设置调用map.clearOverlays不清除此图层覆盖物
+    map.addOverlay(groundOverlay); // 添加透明图层
+    console.log(groundOverlay)
+    console.log("添加透明图层")
+}
+var ground_bl = true
+function showMapOverlay(e) { // 控制展示/隐藏透明导览图
+    if(ground_bl) {
+        addCustomOverlay(map)
+        ground_bl = false
+    } else {
+        console.log(groundOverlay)
+        console.log("删除透明图层")
+        map.removeOverlay(groundOverlay) // 移除透明图层
+        ground_bl = true
+    }
+
+}
 /*添加自定义图层 End*/
 
 /*GCJ02转WGS84坐标系 Start*/
@@ -2622,6 +2817,7 @@ function fireKeyEvent(el, evtType, keyCode) {
         el.fireEvent('on' + evtType, evtObj);
     }
 }
+
 /*JS 模拟键盘鼠标点击 End*/
 
 //根据选择的国家查询省份下拉选信息
@@ -2678,7 +2874,7 @@ function transedBdPoiToGpsPoi(bd_poi, poi_type) { // bd_poi要转换的百度坐
     // var bd_poi = $("#enterance_exit_poi").val()
     var convertor = new BMap.Convertor()
     var pointArr = new Array()
-    if("1" == poi_type) { // 双向出入口
+    if ("1" == poi_type) { // 双向出入口
         var x = bd_poi.substring(0, bd_poi.indexOf(",")) //百度坐标系经度
         var y = bd_poi.substring(bd_poi.indexOf(",") + 1, bd_poi.length) //百度坐标系纬度
         var ggpoint = new BMap.Point(x, y)
@@ -2730,17 +2926,86 @@ function transedBdPoiToGpsPoi(bd_poi, poi_type) { // bd_poi要转换的百度坐
         }
     })
 }
+
 /*百度坐标系转换为原始坐标系 End*/
 
 //编辑模态框中的资源特色的星级显示
 function checkStarNum(star, index) { //star: 星数 ， index： 类型下标
-    if(star != 0) {
-        $(".options input[value="+ index +"]").prop("checked", true);
-        $(".options input[value="+ index +"]").parent().parent().parent().find(".starbox li").eq(star - 1).addClass("axis");
+    if (star != 0) {
+        $(".options input[value=" + index + "]").prop("checked", true);
+        $(".options input[value=" + index + "]").parent().parent().parent().find(".starbox li").eq(star - 1).addClass("axis");
         if (star == 5) {
-            $(".options input[value="+ index +"]").parent().parent().parent().find(".starbox li").find("img").attr("src","/images/shoucang.png");
+            $(".options input[value=" + index + "]").parent().parent().parent().find(".starbox li").find("img").attr("src", "/images/shoucang.png");
         } else {
-            $(".options input[value="+ index +"]").parent().parent().parent().find(".starbox li").eq(star).prevAll().find("img").attr("src","/images/shoucang.png");
+            $(".options input[value=" + index + "]").parent().parent().parent().find(".starbox li").eq(star).prevAll().find("img").attr("src", "/images/shoucang.png");
         }
     }
+}
+
+//校验时间格式有效性
+function test_7(time) {
+    var timeRegex_2 = new RegExp("([0-1]?[0-9]|2[0-3]):([0-5][0-9])$");
+    var b_3 = timeRegex_2.test(time);
+    console.log(b_3)
+    return b_3;
+}
+
+// 查询校验,校验起始时间是否小于截至时间
+function validateTimePeriod(begin, end) { //begin：开始时间, end：结束时间
+    var b_len = begin.length
+    var b_index = begin.indexOf(":")
+    var b_t_h = begin.substring(0, b_index) // 时
+    var b_t_m = begin.substring(b_index + 1, b_len) // 分
+    var e_len = end.length
+    var e_index = end.indexOf(":")
+    var e_t_h = end.substring(0, e_index) // 时
+    var e_t_m = end.substring(e_index + 1, e_len) // 分
+    if (begin == end) {
+        return false;
+    } else if (parseInt(b_t_h) > parseInt(e_t_h) || (parseInt(b_t_h) == parseInt(e_t_h) && parseInt(b_t_m) > parseInt(e_t_m))) {
+        if ("00:00" == end) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
+// 操作结束时间大于开始时间
+function addMin(time_str, type) {
+    var len = time_str.length
+    var index = time_str.indexOf(":")
+    var t_h = time_str.substring(0, index) // 时
+    var t_h_f = time_str.substring(0, 1)
+    var t_h_e = time_str.substring(1, index)
+    var t_m = time_str.substring(index + 1, len) // 分
+    var t_m_f = time_str.substring(index + 1, index + 2)
+    var t_m_e = time_str.substring(index + 2, len)
+    if (type == 0) {
+        if (time_str == "23:59") {
+            time_str = "00:00"
+        } else if (t_m == "59") {
+            time_str = (parseInt(t_h) + 1) + ":00"
+        } else if (t_m_e == "9") {
+            time_str = t_h + ":" + (parseInt(t_m_f) + 1) + "0"
+        } else {
+            time_str = t_h + ":" + t_m_f + (parseInt(t_m_e) + 1)
+        }
+    } else {
+        if (time_str == "00:00") {
+            time_str = "23:59"
+        } else if (t_m == "00") {
+            console.log(parseInt(t_h) - 1)
+            console.log(parseInt(t_h) - 1 < 10)
+            console.log("0" + (parseInt(t_h) - 1))
+            console.log(parseInt(t_h) - 1 < 10 ? ("0" + (parseInt(t_h) - 1)) : parseInt(t_h) - 1)
+            time_str = (parseInt(t_h) - 1 < 10 ? ("0" + (parseInt(t_h) - 1)) : parseInt(t_h) - 1) + ":59"
+        } else if (t_m_e == "0") {
+            time_str = t_h + ":" + (parseInt(t_m_f) - 1) + "9"
+        } else {
+            time_str = t_h + ":" + t_m_f + (parseInt(t_m_e) - 1)
+        }
+    }
+    return time_str
 }

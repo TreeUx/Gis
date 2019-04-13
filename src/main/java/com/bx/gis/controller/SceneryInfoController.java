@@ -102,47 +102,6 @@ public class SceneryInfoController {
     }
 
     /**
-     * @param request
-     * @param session
-     * @return java.lang.String
-     * @Author Breach
-     * @Description 保存图片到指定路径
-     * @Date 2018/12/29
-     * @Param image
-     */
-    /*@RequiresAuthentication
-    @RequestMapping("/uploadImages")
-    @ResponseBody
-    public String uploadImages(@RequestParam("file") MultipartFile image, HttpServletRequest request
-            , HttpServletResponse response, HttpSession session) throws IOException {
-//        File imageFolder = new File(session.getServletContext().getRealPath(UPLOAD_IMAGES)); //获取用户c盘目录下的地址
-        *//***********************************//*
-        System.out.println(System.getProperty("user.dir"));//获取当前项目根路径
-        System.out.println(new File(this.getClass().getResource("/").getPath())); //获取target下的路径
-        //获取类加载的根路径
-//        File imageFolder = new File(this.getClass().getResource("/").getPath()+ File.separator + UPLOAD_IMAGES);
-        File imageFolder = new File(System.getProperty("user.dir") + File.separator + UPLOAD_IMAGES);
-//        System.out.println(imageFolder);
-        *//***********************************//*
-        String fileName = UUID.randomUUID().toString().replace("-", "") + ".jpg";//生成唯一标识，避免文件名重复
-        File file = new File(imageFolder, fileName);
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
-        }
-        if (image != null) {
-            image.transferTo(file);
-            BufferedImage img = ImageUtil.change2jpg(file);//工具类，转成统一jpg 格式，不转也可以,此处可省略
-//            BufferedImage img = ImageIO.read(file);
-            ImageIO.write(img, "jpg", file);
-        }
-        JsonResult<String> result = new JsonResult<>();
-        result.setData(MYSQL_IMAGES + fileName);//图片保存路径
-        result.setCode(100);
-        result.setMessage("上传成功");
-        return new JSONObject(result).toString();
-    }*/
-
-    /**
      * @return java.util.Map<java.lang.String   ,   java.lang.Object>
      * @Author Breach
      * @Description 新增采集的景区单元信息
@@ -193,11 +152,7 @@ public class SceneryInfoController {
         int ornamental = Integer.parseInt(characterJo.get("ornamental").toString()); //观赏性
         int participatory = Integer.parseInt(characterJo.get("participatory").toString()); //参与性
         int iconic = Integer.parseInt(characterJo.get("iconic").toString()); //标志性
-      /*  if(com_duplex != null && com_duplex.length != 0) {
-            for (int i = 0; i < com_duplex.length; i++) { //双向出入口
-                comDuplex += (com_duplex[i] + " ");
-            }
-        }*/
+
         BxCommodityCommon bcc = new BxCommodityCommon(); //商品实体类
         BxSubjectivity bs = new BxSubjectivity(); //资源特色实体类
         bcc.setParentid(parentid);
@@ -314,8 +269,8 @@ public class SceneryInfoController {
         try {
             List<Map<String, Object>> sceneryInfoList = sceneryInfoService.querySceneryInfoByCode(comCode);//查询商品信息
             if (!sceneryInfoList.isEmpty() && sceneryInfoList != null) {
-                results.put("msg", "查询成功");
-                results.put("status", "success");
+//                results.put("msg", "查询成功");
+                results.put("status", 200);
                 results.put("sceneryInfoList", sceneryInfoList);
             } else {
                 results.put("status", "error");
@@ -372,8 +327,9 @@ public class SceneryInfoController {
     public Map<String, Object> queryNewSceneryPartInfo(HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
         String parentid = request.getParameter("parentid");
+        int collect_line_id = Integer.parseInt(request.getParameter("collect_line_id"));
         try {
-            List<Map<String, Object>> sceneryPartInfoList = sceneryInfoService.queryNewSceneryPartInfo(parentid);
+            List<Map<String, Object>> sceneryPartInfoList = sceneryInfoService.queryNewSceneryPartInfo(parentid,collect_line_id);
             result.put("msg", "出入口信息查询成功");
             result.put("status", "success");
             result.put("data", sceneryPartInfoList);
