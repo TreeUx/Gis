@@ -21,8 +21,12 @@ var fea; // 特色资源
 var addLineClick; //鼠标点击事件
 var timeValid = true; // 鉴定时间有效性
 var groundOverlay; // 全局透明图层
+var CanvasDemo;
 $(function () {
-
+    // 整个页面所有的右击事件
+    document.oncontextmenu = function(){
+        return false;
+    }
     /*测试百度坐标系转换为国测局（原始坐标系）坐标系 Start*/
     /* var convertor = new BMap.Convertor()
      var x = 115.264244
@@ -51,21 +55,21 @@ $(function () {
         // 创建一个DOM元素
         var div = document.createElement("div");
         // 添加自定义指南针
-        var content = '<div class="amap-controlbar" style="right: 10px; top: 620px;">' +
+        var content = '<div class="amap-controlbar" style="right: 10px; top: 690px;position: fixed">' +
             '<div class="amap-luopan">' +
             '<div class="amap-luopan-bg">' +
             '</div>' +
-            '<div class="amap-compass" style="transform: rotateX(-6.66667deg) rotateZ(-15deg);">' +
+            '<div class="amap-compass" style="transform: rotateX(-0deg) rotateZ(-0deg);">' +
             '<div class="amap-pointers">' +
             '</div>' +
             '</div>' +
-            '<div class="amap-pitchUp amap-controlbar-disable">' +
+            '<div class="amap-pitchUp amap-controlbar-disable" type="up" onmousedown="holdDown(this)" onmouseup="holdUp()">' +
             '</div>' +
-            '<div class="amap-pitchDown amap-controlbar-disable">' +
+            '<div class="amap-pitchDown amap-controlbar-disable" type="down" onmousedown="holdDown(this)" onmouseup="holdUp()">' +
             '</div>' +
-            '<div class="amap-rotateLeft">' +
+            '<div class="amap-rotateLeft" type="left" onmousedown="holdDown(this)" onmouseup="holdUp()">' +
             '</div>' +
-            '<div class="amap-rotateRight">' +
+            '<div class="amap-rotateRight" type="right" onmousedown="holdDown(this)" onmouseup="holdUp()">' +
             '</div></div><div class="amap-controlbar-zoom" style="display: none;">' +
             '<div></div><div class="amap-controlbar-zoom-add"></div>' +
             '<div class="amap-controlbar-zoom-sub">' +
@@ -86,6 +90,7 @@ $(function () {
         // 将DOM元素返回
         return div;
     }
+
     /*自定义控件end*/
 
     //展开、隐藏
@@ -101,6 +106,16 @@ $(function () {
             $("#scenery_box").fadeTo("3000", 0.9)
             $("#bx_bdmap").css("margin-top", "220px") //设置地图离页面顶部的距离
             $(this).text("折叠");
+        }
+    });
+    //导览图复位
+    $("#reset").click(function () {
+        console.log(map.getCenter().lng + "," + map.getCenter().lat)
+        var lng = $("#navigation_poi").attr("poi_lng") // 记忆经度
+        var lat = $("#navigation_poi").attr("poi_lat") // 记忆纬度
+        var zoom = $("#navigation_poi").attr("poi_zoom") // 记忆地图级别
+        if(lng != "") {
+            map.centerAndZoom(new BMap.Point(lng, lat), zoom); //初始化地图，设置地图级别
         }
     });
 
@@ -565,6 +580,8 @@ function bdFixedPosition() {
  * @Date 2018/12/20
  */
 function queryMapInfo() {
+    // 隐藏导览图
+    $("#idContainer").css("overflow", "hidden")
     mapType = $("#map_type_sel").val()
     var scenery_name = $("#input_name").val();
     if (scenery_name != "") {
@@ -682,7 +699,7 @@ function showSceneryInfoMap(scenery_name) {
     map.addControl(navigationControl);
     map.addControl(mapTypeControl);
 
-    // 创建自定义控件实例
+    // 创建自定义控件实例（指南针）
     var myZoomCtrl = new ZoomControl();
     // 添加到地图当中
     map.addControl(myZoomCtrl);
@@ -711,6 +728,7 @@ function showSceneryInfoMap(scenery_name) {
         alert("当前信号较弱,请前往开阔地带重新进行定位");
     });
     addClickFun(map) //添加右键菜单
+
 }
 
 //为搜索展示的地图添加右键菜单功能
@@ -791,8 +809,8 @@ function addClickFun(map) {
                     cancelDraw(map, pointList)
                     // pointListTemp = pointList.concat() //方式一实现数组的深拷贝
                 }
-            }/*,
-            {
+            },
+            /*{
                 text: '采集出入口',
                 callback: function () {
                     console.log('采集出入口');
@@ -800,15 +818,17 @@ function addClickFun(map) {
                     addClick() //添加采集出入口坐标事件
 
                 }
-            },
+            },*/
             {
-                text: '结束出入口采集',
+                text: '记忆导览图校验位置',
                 callback: function () {
-                    console.log('结束出入口采集');
+                    console.log(map.getCenter().lng + "," + map.getCenter().lat + "，地图级别为：" + map.getZoom())
+                    $("#navigation_poi").attr("poi_lng", map.getCenter().lng) // 中心点经度
+                    $("#navigation_poi").attr("poi_lat", map.getCenter().lat) // 中心点纬度
+                    $("#navigation_poi").attr("poi_zoom", map.getZoom()) // 地图的级别
                     $(".BMap_contextMenu").remove() //删除菜单项
-                    removeClick() //移除事件
                 }
-            }*/,
+            },
             {
                 text: '线路规划',
                 callback: function () {
@@ -2705,13 +2725,18 @@ function addCustomOverlay(map) {
     // 设置GroundOverlay的图片地址
     groundOverlay.setImageURL($(".demo1").attr("src"));
     // 单击事件
-    groundOverlay.addEventListener('click', function (clickEvent) {
+    groundOverlay.addEventListener('click', function (clickEvent) { // 为自定义的景区导览图图层添加鼠标左键点击事件
         console.log('导览图区域被单击');
+        console.log(this)
+        console.log(this.V.children)
+        console.log(this.V.children[0]) // 获取自定义的当前图层
+        console.log($(this.V.children[0]).attr("id", "tour_guide_img")) // 对图片的img标签进行属性添加
+        $(this.V.children[0]).attr("id", "tour_guide_img") // 对图片的img标签进行属性添加
     });
 
     // 双击事件dblclick
     // 右击事件
-    groundOverlay.addEventListener('rightclick', function (dblclickEvent) {
+    groundOverlay.addEventListener('rightclick', function (dblclickEvent) { // 为自定义的景区导览图图层添加鼠标右键点击事件
         console.log('导览图区域被双击');
         addClickFun(map) // 添加右键菜单
     });
@@ -2720,12 +2745,25 @@ function addCustomOverlay(map) {
     console.log(groundOverlay)
     console.log("添加透明图层")
 }
+
 var ground_bl = true
+
 function showMapOverlay(e) { // 控制展示/隐藏透明导览图
-    if(ground_bl) {
-        addCustomOverlay(map)
+    if (ground_bl) {
+        // addCustomOverlay(map)
         ground_bl = false
+        /*可缩放拖拽图片操作 Start*/
+        $("#idContainer").css('z-index', '9999'); // 设置导览图图层置顶
+        $("#bx_bdmap").css('z-index', '-1'); // 设置导览图图层置顶
+        $("#idContainer").css("overflow", "") // 设置显示图片
+        // $("#idContainer").css("z-index", "1") // 设置显示图片
+        $("#bx_bdmap").css("opacity", "1") // 设置显示图片
+        $("#idContainer").css("opacity", "0.3") // 设置显示图片
+        /*可缩放拖拽图片 End*/
     } else {
+        $("#bx_bdmap").css('z-index', '9999'); // 设置地图图层置顶
+        $("#idContainer").css("z-index", "-1") // 设置底层
+        $("#idContainer").css("opacity", "0") // 设置显示图片透明度为0
         console.log(groundOverlay)
         console.log("删除透明图层")
         map.removeOverlay(groundOverlay) // 移除透明图层
@@ -2733,6 +2771,7 @@ function showMapOverlay(e) { // 控制展示/隐藏透明导览图
     }
 
 }
+
 /*添加自定义图层 End*/
 
 /*GCJ02转WGS84坐标系 Start*/
@@ -3009,3 +3048,79 @@ function addMin(time_str, type) {
     }
     return time_str
 }
+
+//地图透明化
+var map_bl = true;
+
+function showCrystalMap() {
+    if (map_bl) {
+        $("#bx_bdmap").css("opacity", "0.6")
+        $("#idContainer").css("opacity", "1")
+        map_bl = false
+    } else {
+        $("#bx_bdmap").css("opacity", "1")
+        map_bl = true
+    }
+}
+
+function minuxOpacity() {
+    var num = $("#bx_bdmap").css("opacity")
+    if (num != 0) {
+        $("#bx_bdmap").css("opacity", num - 0.1)
+    }
+}
+
+function addOpacity() {
+    var num = $("#bx_bdmap").css("opacity")
+    num = parseFloat(num)
+    if (num != 1) {
+        $("#bx_bdmap").css("opacity", num + 0.1)
+    }
+}
+
+/* 监听鼠标长按事件 Start*/
+var timeStart, timeEnd, time;//申明全局变量
+function getTimeNow() {//获取此刻时间
+    var now = new Date();
+    return now.getTime();
+}
+function holdDown(e) {//鼠标按下时触发
+    var type = $(e).attr("type")
+    timeStart = getTimeNow();//获取鼠标按下时的时间
+    time = setInterval(function () {//setInterval会每100毫秒执行一次
+        timeEnd = getTimeNow();//也就是每100毫秒获取一次时间
+        if (timeEnd - timeStart > 600) {//如果此时检测到的时间与第一次获取的时间差有600毫秒
+            // clearInterval(time);//便不再继续重复此函数 （clearInterval取消周期性执行）
+            switch (type) {
+                case "up":
+                    console.log("长按up");//并弹出代码
+                    break
+                case "down":
+                    console.log("长按down");//并弹出代码
+                    break
+                case "left":
+                    console.log("长按left");//并弹出代码
+                    var canvas=document.querySelector('bx_bdmap');
+                    var ctx=canvas.getContext('2d');
+                    //3.把旋转的矩形平移进画布
+                    ctx.translate(300,300)
+                    //1.定义一个旋转的方法,确定每次时间间隔中要旋转多少弧度
+                    ctx.rotate(0.01*Math.PI);
+                    break
+                case "right":
+                    console.log("长按right");//并弹出代码
+                    var canvas=document.getElementById('bx_bdmap');
+                    var ctx=canvas.getContext('2d');
+                    //3.把旋转的矩形平移进画布
+                    ctx.translate(300,300)
+                    //1.定义一个旋转的方法,确定每次时间间隔中要旋转多少弧度
+                    ctx.rotate(0.01*Math.PI);
+                    break
+            }
+        }
+    }, 100);
+}
+function holdUp() {
+    clearInterval(time);//如果按下时间不到1000毫秒便弹起，
+}
+/* 监听鼠标长按事件 End*/
