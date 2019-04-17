@@ -3051,7 +3051,6 @@ function addMin(time_str, type) {
 
 //地图透明化
 var map_bl = true;
-
 function showCrystalMap() {
     if (map_bl) {
         $("#bx_bdmap").css("opacity", "0.6")
