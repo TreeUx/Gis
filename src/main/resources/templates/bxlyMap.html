@@ -765,9 +765,9 @@
 <body style="background-color: #f7f1f1">
 <!--导览图-->
 <div id="idContainer" style="position: relative;">
-    <input id="navigation_poi" poi_lng="" type="hidden">
-    <img id="oImg" style="width: 900px;height: 476px;visibility: hidden"
-         src="/js/canvas/0.jpg"/>
+    <input id="navigation_poi" poi_lng="" value="0" type="hidden">
+    <img id="oImg" style="width: 900px;height: 476px;margin-left: -955px;visibility: hidden"
+         src="/img/1.jpg"/>
 </div>
 <!--导览图-->
 
@@ -817,8 +817,8 @@
                 <div class="layui-input-block">
                     <div class="layui-upload">
                         <button type="button" class="layui-btn test1">上传图片</button>
-                        <div class="layui-upload-list">
-                            <img id="img_demo1" class="layui-upload-img demo1" style="border: 1px solid #63b963;margin-left: -430px;visibility: hidden">
+                        <div class="layui-upload-list" style="margin-left: -1600px;">
+                            <img id="img_demo1" class="layui-upload-img demo1" style="border: 1px solid #63b963;margin-left: -1825px;visibility: hidden">
                             <p class="demoText"></p >
                         </div>
                     </div>
@@ -849,10 +849,10 @@
         </select>
         <input id="show_overlay_bt" type="button" class="webuploader-container" showAndHide="hide"
                onclick="showMapOverlay(this)" value="图层" style="z-index: 9999;"/>
-        <a href="javascript:0;" onclick="minuxOpacity();"> - </a><input id="show_overlay_bt" type="button" class="webuploader-container" showAndHide="hide"
+        <a href="javascript:0;" onclick="minuxOpacity();" style="margin-left: 15px;"> - </a><input id="show_overlay_bt" type="button" class="webuploader-container" showAndHide="hide"
                onclick="showCrystalMap()" value="地图透明化"/><a href="javascript:0;" onclick="addOpacity();"> + </a>
-        <button id="reset" type="button" class="btn webuploader-container" style="background: #81e6f1">复位</button>
-        <button id="tog" type="button" class="btn webuploader-container" style="background: #81e6f1">折叠</button>
+        <button id="reset" type="button" class="btn webuploader-container" style="background: #81e6f1;margin-left: 15px">复位</button>
+        <!--<button id="tog" type="button" class="btn webuploader-container" style="background: #81e6f1">折叠</button>-->
         <!--清除浮动-->
         <div style="clear: both"></div>
     </div>
@@ -1502,12 +1502,13 @@
                 $(item).siblings(".layui-upload-list").find('.demo1').attr('src', imgurl+res.data.path)
                 $(item).siblings(".layui-upload-list").find('.demo1').attr('imgUrl',res.data.path)
 
+                $("#navigation_poi").val("1")
                 // 更改导览图
                 $("#oImg").attr('src', imgurl+res.data.path);
                 $("#conImg").attr('src', imgurl+res.data.path);
                 $("#idContainer").css('z-index', '998');
-                $("#conImg").css('width', '7890px');
-                $("#conImg").css('height', '4609px');
+                $("#conImg").css('width', 'auto');
+                $("#conImg").css('height', 'auto');
                 $("#conImg").css('top', '0');
                 $("#conImg").css('left', '0');
 

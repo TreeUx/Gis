@@ -144,7 +144,7 @@ public class UserManageController {
         UUser user = new UUser();
         String username = request.getParameter("username"); //用户名称
         int userId = Integer.parseInt(request.getParameter("userId")); //当前用户id
-        user.setNickname(username);
+        user.setNickname("%" + username + "%");
         user.setId(userId);
         try {
             List<UUser> userInfoList = userManageService.searchUserInfo(user); //根据条件查询用户信息

@@ -29,9 +29,11 @@ public interface SceneryInfoService {
 
     int addPointlineInfos(Map<String, Object> params);
 
-    List<Map<String, Object>> queryNewSceneryPartInfo(String parentid, int collect_line_id);
+    List<Map<String, Object>> queryNewSceneryPartInfo(String parentid, List<Integer> collectUserList);
 
     int checkPsw(Map<String, Object> para);
 
     List<Map<String, Object>> queryIntroduceInfo(int parentid);
+
+    List<Integer> queryCollectUserInfo(int collect_line_id);
 }

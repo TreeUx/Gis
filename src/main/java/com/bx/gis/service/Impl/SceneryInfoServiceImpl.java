@@ -144,8 +144,8 @@ public class SceneryInfoServiceImpl implements SceneryInfoService {
     }
 
     @Override
-    public List<Map<String, Object>> queryNewSceneryPartInfo(String parentid, int collect_line_id) {
-        return sceneryInfoMapper.queryNewSceneryPartInfo(parentid, collect_line_id);
+    public List<Map<String, Object>> queryNewSceneryPartInfo(String parentid, List<Integer> collectUserList) {
+        return sceneryInfoMapper.queryNewSceneryPartInfo(parentid, collectUserList);
     }
 
     /**
@@ -170,5 +170,17 @@ public class SceneryInfoServiceImpl implements SceneryInfoService {
     @Override
     public List<Map<String, Object>> queryIntroduceInfo(int parentid) {
         return sceneryInfoMapper.queryIntroduceInfo(parentid);
+    }
+
+    /**
+      * @Author Barton
+      * @Description 查询当前登录账号下的子采线员id
+      * @Date 2019/4/20
+      * @Param collect_line_id
+      * @return java.util.List<java.util.Map<java.lang.String,java.lang.Object>>
+      */
+    @Override
+    public List<Integer> queryCollectUserInfo(int collect_line_id) {
+        return sceneryInfoMapper.queryCollectUserInfo(collect_line_id);
     }
 }

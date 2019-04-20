@@ -50,7 +50,7 @@
     <!-- 根据商品code查询景区商品信息 -->
     <select id="querySceneryInfoByCode" resultType="java.util.Map">
         SELECT
-            bc.id "id",bc.com_code "com_code",com_name,state,city,com_address,com_entrance,com_exit,com_duplex,com_begining,com_moment,com_best,com_level,com_img,com_central,
+            bc.id "id",bc.com_code "com_code",com_name,state,city,com_address,com_entrance,com_exit,com_duplex,com_begining,com_moment,com_best,com_introduce,com_level,com_img,com_central,
             epidemic,recreational,nostalgic,romantic,parent_child,naturalness,singularity,excitement,culture,ornamental,participatory,iconic,bci.id 'imgId',
 	        bci.img_url 'imgUrl'
         FROM
@@ -128,7 +128,7 @@
 --         AND com_level = 5
     </select>
 
-    <!-- 查询景点下所有新添加的景点数据，并以标记展示出来 -->
+    <!-- 查询景点下所有新添加的景点数据，并以标记展示出来 (parentid:景点id, collect_line_id：采线员id)-->
     <select id="queryNewSceneryPartInfo" resultType="java.util.Map">
         SELECT
             parentid,
@@ -139,10 +139,13 @@
             bx_commodity
         WHERE
             parentid = #{param1}
-        AND	collect_line_id = #{param2}
         AND com_central != ""
         AND com_central is not null
         AND del_state = "1"
+        AND	collect_line_id IN
+        <foreach collection="param2" item="collectId" index="index" separator="," open="(" close=")">
+            #{collectId}
+        </foreach>
     </select>
 
     <!-- 查询景点下的所有路线的轨迹信息 -->
@@ -162,9 +165,10 @@
     <insert id="addPointlineInfos" parameterType="java.util.Map">
       INSERT INTO
         bx_commodity (
-          com_code,com_type,parentid,com_track,com_name,com_begining,com_moment,com_level,state
+          com_code,com_type,parentid,com_track,com_name,com_begining,com_moment,com_level,state,bx_op_deptid,collect_line_id,com_time
         ) VALUES (
-          #{comCode},#{comType},#{parentid},#{transedPointStrs},#{comName},#{comBegining},#{comMoment},#{comLevel},#{state}
+          #{comCode},#{comType},#{parentid},#{transedPointStrs},#{comName},#{comBegining}
+          ,#{comMoment},#{comLevel},#{state},#{bxOpDeptid},#{collectLineId},now()
         )
     </insert>
 
@@ -188,5 +192,16 @@
       WHERE
         id = #{parentid}
     </select>
+
+    <!--查询当前登录的采线员下的所有子采线员id-->
+    <select id="queryCollectUserInfo" resultType="java.lang.Integer">
+      SELECT
+        id
+      FROM
+        u_user
+      WHERE
+        parent_id = #{collect_line_id}
+    </select>
+
 
 </mapper>

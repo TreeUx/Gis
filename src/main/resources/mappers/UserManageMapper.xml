@@ -68,7 +68,7 @@
 	  FROM
 		u_user
 	  WHERE
-	  	nickname = #{nickname}
+	  	nickname LIKE #{nickname}
 	  	AND parent_id = #{id}
 	</select>
 

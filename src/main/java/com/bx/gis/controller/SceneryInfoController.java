@@ -327,9 +327,14 @@ public class SceneryInfoController {
     public Map<String, Object> queryNewSceneryPartInfo(HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
         String parentid = request.getParameter("parentid");
+        // 当前采线员id
         int collect_line_id = Integer.parseInt(request.getParameter("collect_line_id"));
+        // 查询当前登录的采线员下的所有子采线员id
+        List<Integer> collectUserList = sceneryInfoService.queryCollectUserInfo(collect_line_id);
+        collectUserList.add(collect_line_id);
+        // 查询
         try {
-            List<Map<String, Object>> sceneryPartInfoList = sceneryInfoService.queryNewSceneryPartInfo(parentid,collect_line_id);
+            List<Map<String, Object>> sceneryPartInfoList = sceneryInfoService.queryNewSceneryPartInfo(parentid,collectUserList);
             result.put("msg", "出入口信息查询成功");
             result.put("status", "success");
             result.put("data", sceneryPartInfoList);
@@ -385,7 +390,9 @@ public class SceneryInfoController {
         Map<String, Object> params = new HashMap<>();
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         String comCode = new StringRandom().getStringRandom(8);//商品编码
-        String parentid = request.getParameter("parentid");
+        String parentid = request.getParameter("parentid"); // 父类id
+        String bxOpDeptid = request.getParameter("bxOpDeptid"); // 旅行社id
+        String collectLineId = request.getParameter("collectLineId"); // 采线员id
         String transedPointStrs = request.getParameter("transedPointStrs");
         String comName = request.getParameter("comName");
         Date comBegining = sdf.parse("08:00");
@@ -395,6 +402,8 @@ public class SceneryInfoController {
         String state = "33"; //国家
         params.put("comName", comName + "度假区LN"); //商品名称
         params.put("transedPointStrs", transedPointStrs); //轨迹
+        params.put("bxOpDeptid", bxOpDeptid); //旅行社id
+        params.put("collectLineId", collectLineId); //采线员id
         params.put("parentid", parentid); //父类id
         params.put("comCode", comCode); //商品code
         params.put("comType", comType); //商品类型

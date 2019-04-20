@@ -1423,12 +1423,14 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
     var com_best = "" //最佳游玩时间
     var com_level = "" //伴行级别
     var com_img = "" //解说词
+    var com_introduce = "" //商品介绍
     var com_code = "" //商品code
     var scenery_character = "" //资源特色
     var com_type = "" //类型
     var com_duplex = "" //双向出入口
     var com_exit = "" //出口
     var com_entrance = "" //入口
+    var com_central = "" //中心点
     /*资源特色*/
     var ornamental = 0 //舒适性
     var culture = 0 //人文性
@@ -1455,6 +1457,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         com_best = data.com_best
         com_level = data.com_level
         com_img = data.com_img
+        com_introduce = data.com_introduce
         com_code = data.com_code
         com_central = data.com_central //出入口坐标
         com_entrance = data.com_entrance //入口
@@ -1493,7 +1496,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
     //右键菜单
     var content = '<div id="myModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true" >' +
         '<div class="modal-dialog">' +
-        '<div class="modal-content" style="width: 435px;height: 595px;">' +
+        '<div class="modal-content" style="width: 435px;height: 680px;">' +
         // '<div class="modal-header">' +
         //     '<h4 class="modal-title" id="addModalLabel" style="border-bottom: 1px solid #878787;padding-bottom: 15px;">新增景点</h4>' +
         // '</div>' +
@@ -1513,7 +1516,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '<input id="collect_line_id" name="collect_line_id" type="hidden" value="' + User.id + '"/>' +
         '<input id="bx_op_deptid" name="bx_op_deptid" value="" type="hidden">' +
         '<input id="parentid" name="parentid" type="hidden" value="' + parentid + '"/>' +
-        '<input id="com_central" name="com_central" type="hidden" value="' + lng + "," + lat + '"/>' +
+        '<input id="com_central" name="com_central" type="hidden" value="' + com_central + '"/>' +
         '<input id="com_code" name="com_code" type="hidden" value="' + com_code + '"/>' +
         '<input id="com_name" name="com_name" type="text" style="margin-left: -5px;padding: 3px;" value="' + com_name + '" placeholder="请输入景点名称"/>' +
         '</div>' +
@@ -1654,7 +1657,17 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '<label for="" class="control-label">解说词：</label>' +
         '</div>' +
         '<div class="">' +
-        '<textarea id="com_img" name="com_img" rows="3" cols="20" style="margin-left: -15px;">' + com_img + '</textarea>' +
+        '<textarea id="com_img" name="com_img" rows="2" cols="20" style="margin-left: -15px;">' + com_img + '</textarea>' +
+        '</div>' +
+        '</div>' +
+        '</div>' +
+        '<div class="row" style="padding: 5px;">' +
+        '<div class="form-group" style="width: 456px;">' +
+        '<div class="col-sm-3" style="float: left;margin-left: 25px;">' +
+        '<label for="" class="control-label">商品介绍：</label>' +
+        '</div>' +
+        '<div class="">' +
+        '<textarea id="com_introduce" name="com_introduce" rows="2" cols="20" style="margin-left: -15px;">' + com_introduce + '</textarea>' +
         '</div>' +
         '</div>' +
         '</div>' +
@@ -1668,7 +1681,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
         '                    <div class="layui-upload">' +
         '                        <button type="button" class="layui-btn test2">上传图片</button>' +
         '                        <div class="layui-upload-list">' +
-        '                            <img class="layui-upload-img demo2" style="width: 200px;height: 125px;border: 1px solid #63b963" />' +
+        '                            <img class="layui-upload-img demo2" style="width: 200px;height: 125px;border: 1px solid white;" />' +
         '                            <p class="demoText"></p >' +
         '                        </div>' +
         '                    </div>' +
@@ -1698,7 +1711,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
     var infoWindow = new BMap.InfoWindow(content, {
         offset: new BMap.Size(0, 0), //设置弹窗偏移量
         width: 430, //设置弹窗宽度
-        height: 610, //取值范围：0, 220 - 730。如果您指定宽度为0，则信息窗口的宽度将按照其内容自动调整
+        height: 690, //取值范围：0, 220 - 730。如果您指定宽度为0，则信息窗口的宽度将按照其内容自动调整
         enableAutoPan: true, //是否开启信息窗口打开时地图自动移动（默认开启）
         enableCloseOnClick: false //是否开启点击地图关闭信息窗口（默认开启）
         // title: "新增景点"
@@ -1764,7 +1777,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
             $("#com_duplex").val(com_duplex); //初始化双向出入口坐标
             $("#com_exit").val(com_exit); //初始化出口坐标
             $("#com_entrance").val(com_entrance); //初始化入口坐标
-            $(".demo2").attr("src", imgUrl == "" ? imgUrl : imgurl + imgUrl) // 设置图片地址
+            $(".demo2").attr("src", imgUrl == "" ? " " : imgurl + imgUrl) // 设置图片地址
             $(".demo2").attr("imgurl", imgUrl) // 设置imgurl图片属性
             if ("修改景点" == title) {
                 $("#poi_div").css("display", "none") //隐藏出入口div
@@ -1817,7 +1830,8 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
                         var y = 2 * y1 - y2
                         x = x.toFixed(10)
                         y = y.toFixed(10)
-                        $("#com_central").val(x + "," + y)
+                        // $("#com_central").val(x + "," + y)
+                        $("#com_central").val($("#com_duplex").val()); //中心点坐标
                     }
                 })
             }
@@ -1853,6 +1867,7 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
 //展示特色星级选择模态框
 function showStarModal() {
     $("#modal-cstc").modal("show")
+    $('#modal-cstc').draggable(); //设置模态框可以拖拽
 }
 
 //监听添加模态框中出入口下拉选改变事件
@@ -2130,7 +2145,7 @@ function saveNewSceneryInfo(e) {
         "com_com_exit": $("#com_name").val(),
         "com_duplex": $("#com_duplex").val(),
         "com_img": $("#com_img").val(),
-        "com_introduce": $("#com_img").val(),
+        "com_introduce": $("#com_introduce").val(),
         "com_begining": $("#com_begining").val(),
         "com_moment": $("#com_moment").val(),
         //"com_best": mer_req.mer_best,
@@ -2564,6 +2579,8 @@ function addPointlineInfos(transedPointStrs, pointList) {
         data: {
             "transedPointStrs": transedPointStrs, //轨迹
             "parentid": parentid, //父类id
+            "bxOpDeptid": User.op_deptid, //旅行社id
+            "collectLineId": User.id, //采线员id
             "comName": $("#input_name").val() //景点名称
         },
         dataType: "json",
@@ -2747,29 +2764,32 @@ function addCustomOverlay(map) {
 }
 
 var ground_bl = true
-
 function showMapOverlay(e) { // 控制展示/隐藏透明导览图
-    if (ground_bl) {
-        // addCustomOverlay(map)
-        ground_bl = false
-        /*可缩放拖拽图片操作 Start*/
-        $("#idContainer").css('z-index', '9999'); // 设置导览图图层置顶
-        $("#bx_bdmap").css('z-index', '-1'); // 设置导览图图层置顶
-        $("#idContainer").css("overflow", "") // 设置显示图片
-        // $("#idContainer").css("z-index", "1") // 设置显示图片
-        $("#bx_bdmap").css("opacity", "1") // 设置显示图片
-        $("#idContainer").css("opacity", "0.3") // 设置显示图片
-        /*可缩放拖拽图片 End*/
+    var flag = $("#navigation_poi").val() // 判断是否上传导览图
+    if("0" == flag) {
+        alert("请先上传导览图")
     } else {
-        $("#bx_bdmap").css('z-index', '9999'); // 设置地图图层置顶
-        $("#idContainer").css("z-index", "-1") // 设置底层
-        $("#idContainer").css("opacity", "0") // 设置显示图片透明度为0
-        console.log(groundOverlay)
-        console.log("删除透明图层")
-        map.removeOverlay(groundOverlay) // 移除透明图层
-        ground_bl = true
+        if (ground_bl) {
+            // addCustomOverlay(map)
+            ground_bl = false
+            /*可缩放拖拽图片操作 Start*/
+            $("#bx_bdmap").css('z-index', '-1'); // 设置导览图图层置顶
+            $("#idContainer").css('z-index', '10000'); // 设置导览图图层置顶
+            $("#idContainer").css("overflow", "") // 设置显示图片
+            // $("#idContainer").css("z-index", "1") // 设置显示图片
+            $("#bx_bdmap").css("opacity", "1") // 设置显示图片
+            $("#idContainer").css("opacity", "0.3") // 设置显示图片
+            /*可缩放拖拽图片 End*/
+        } else {
+            $("#idContainer").css("z-index", "-1") // 设置底层
+            $("#bx_bdmap").css('z-index', '9999'); // 设置地图图层置顶
+            $("#idContainer").css("opacity", "0") // 设置显示图片透明度为0
+            console.log(groundOverlay)
+            console.log("删除透明图层")
+            map.removeOverlay(groundOverlay) // 移除透明图层
+            ground_bl = true
+        }
     }
-
 }
 
 /*添加自定义图层 End*/
