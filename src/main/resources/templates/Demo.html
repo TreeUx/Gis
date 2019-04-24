@@ -1,0 +1,42 @@
+<!--用于声明改文件为HTML5文件-->
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+    <title>图片变换效果</title>
+
+    <script th:src="@{/js/trans/CJL.0.1.min.js}" type="text/javascript"></script>
+    <script th:src="@{/js/trans/ImageTrans.js}" type="text/javascript"></script>
+
+</head>
+<body>
+<style>
+    #idContainer{border:1px solid #000;width:500px; height:400px; background:pink center no-repeat;}
+</style>
+<div id="idContainer" style="position: relative; overflow: hidden;">
+    <img style="position: absolute; border: 0px; padding: 0px; margin: 0px;
+    width: auto; height: auto; visibility: visible; top: -38px; left: -200px;
+    transform: matrix(0.216366, -1.78695, 1.78695, 0.216366, 0, 0);">
+</div><br>
+
+
+<script>
+    (function(){
+        var container = $$("idContainer"), src = "http://www.17sucai.com/preview/8730/2014-05-11/%E4%BB%A5%E9%BC%A0%E6%A0%87%E4%BD%8D%E7%BD%AE%E4%B8%BA%E4%B8%AD%E5%BF%83%E7%9A%84%E6%BB%91%E8%BD%AE%E6%94%BE%E5%A4%A7%E5%8A%9F%E8%83%BDdemo1/images/demo.jpg",
+            options = {
+                onPreLoad: function(){
+                    container.style.backgroundImage = "url('/images/loading.gif')";
+                },
+                onLoad: function(){
+                    container.style.backgroundImage = "";
+                },
+                onError: function(err){
+                    container.style.backgroundImage = ""; alert(err);
+                }
+            },
+            it = new ImageTrans( container, options );
+        it.load(src);
+    })()
+</script>
+
+</body></html>
