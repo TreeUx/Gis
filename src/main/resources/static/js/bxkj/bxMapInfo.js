@@ -2473,6 +2473,7 @@ function saveNewSceneryInfo(e) {
                 var comCode = data.data.com_code;//获取保存的景点的商品编码
                 var lng = $("#com_central").val().substring(0, $("#com_central").val().indexOf(",")) //转换后的坐标
                 var lat = $("#com_central").val().substring($("#com_central").val().indexOf(",") + 1, $("#com_central").val().indexOf(",").length)//转换后的坐标
+
                 addMarkImg(map, lng, lat, comCode, e);//添加标记
                 removeClick() // 移除鼠标点击事件
             } else {
@@ -2515,6 +2516,8 @@ function addMarkImg(map, lng, lat, comCode, e) {
         var fixedPoint = point //添加景点时，为转换前的坐标值（弹出修改窗时使用）
 
         var point = new BMap.Point(lng, lat);
+        // 添加标记后，将标记点坐标放入需要探测出入口的数组中
+        enterAndExitArr.push(point)
         // 创建点坐标
         map.centerAndZoom(point, map.getZoom());//map.getZoom()返回当前地图的缩放级别
         var myIcon = new BMap.Icon("/images/map1.png"
