@@ -81,6 +81,16 @@
       WHERE
 	    t1.product_id = #{comCode}
     </delete>
+
+    <!--删除被拆分的线路的原信息-->
+    <update id="delLineTrackInfo">
+      UPDATE
+        bx_commodity
+      SET
+        del_state = 0
+      WHERE
+        id = #{id}
+    </update>
     <!-- 查询修改时景点修改的名称是否已经存在 -->
     <select id="querySceneryCount" resultType="java.lang.Integer">
       SELECT
@@ -141,11 +151,31 @@
             parentid = #{param1}
         AND com_central != ""
         AND com_central is not null
-        AND del_state = "1"
+        AND del_state = 1
         AND	collect_line_id IN
         <foreach collection="param2" item="collectId" index="index" separator="," open="(" close=")">
             #{collectId}
         </foreach>
+    </select>
+    <!--查询所有线路的起点坐标信息-->
+    <select id="queryNewSceneryTrackInfo" resultType="java.util.Map">
+      SELECT
+        parentid,
+        1 'com_name',
+        1 'com_central',
+        SUBSTRING_INDEX(com_track, " ", 1) AS "com_centrals",
+        com_code
+      FROM
+        bx_commodity
+      WHERE
+        parentid = #{param1}
+        AND com_track is not null
+        AND del_state = 1
+        AND	collect_line_id IN
+        <foreach collection="param2" item="collectId" index="index" separator="," open="(" close=")">
+            #{collectId}
+        </foreach>
+        GROUP BY com_centrals
     </select>
 
     <!-- 查询景点下的所有路线的轨迹信息 -->
@@ -159,6 +189,8 @@
         bx_commodity
       WHERE
         parentid = #{parentid}
+        AND del_state = 1
+        AND com_track is not null
     </select>
 
     <!--保存转换后的景点线路坐标信息-->
@@ -171,6 +203,36 @@
           ,#{comMoment},#{comLevel},#{state},#{bxOpDeptid},#{collectLineId},now()
         )
     </insert>
+
+    <!--新增线路百度坐标及对应的Gps坐标信息-->
+    <insert id="addPoiInfo">
+      INSERT INTO
+        bx_commodity_poi (
+        id,com_track_gps
+        ) VALUES (
+        #{id},#{com_track_gps}
+        )
+    </insert>
+
+    <!--保存百度坐标信息到bx_commodity_poi-->
+    <insert id="addBdTrackPoi">
+        UPDATE
+          bx_commodity_poi
+        SET
+          com_track_bd = #{com_track_bd}
+        WHERE
+          id = #{id}
+    </insert>
+
+    <!--修改线路百度坐标及对应的Gps坐标信息-->
+    <update id="updatePoiInfo">
+      UPDATE
+        bx_commodity_poi
+      SET
+        com_track_bd = CONCAT(com_track_bd, #{com_track_bd})
+      WHERE
+        id = #{id}
+    </update>
 
     <!--校验用户名和密码-->
     <select id="checkPsw" resultType="java.lang.Integer">
@@ -201,6 +263,52 @@
         u_user
       WHERE
         parent_id = #{collect_line_id}
+    </select>
+
+    <!--查询线路id是否存在-->
+    <select id="findIdNum" resultType="java.lang.Integer">
+        SELECT
+          COUNT(0)
+        FROM
+          bx_commodity_poi
+        WHERE
+          id = #{id}
+    </select>
+
+    <!--查询该条线路的坐标信息是否完整-->
+    <select id="findInfoCount" resultType="java.lang.Integer">
+        SELECT
+          COUNT(0)
+        FROM
+          bx_commodity_poi
+        WHERE
+          id = #{id}
+          AND com_track_gps = #{com_track_gps}
+    </select>
+
+    <!--查询线路百度及Gps坐标扩展表信息-->
+    <select id="queryGpsPoiTrackInfo" resultType="java.util.Map">
+        SELECT
+          id,com_track_gps
+        FROM
+          bx_commodity_poi
+      WHERE
+          com_track_bd is null
+    </select>
+
+    <!--根据线路gps轨迹查询操作的线路的id-->
+    <select id="findLineId" resultType="java.lang.Integer">
+        SELECT
+            IFNULL(
+                (
+                    SELECT
+                        id
+                    FROM
+                        bx_commodity_poi
+                    WHERE
+                        com_track_bd = #{com_track_bd}
+                ) ,- 1
+            ) "id"
     </select>
 
 

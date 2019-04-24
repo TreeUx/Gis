@@ -183,4 +183,113 @@ public class SceneryInfoServiceImpl implements SceneryInfoService {
     public List<Integer> queryCollectUserInfo(int collect_line_id) {
         return sceneryInfoMapper.queryCollectUserInfo(collect_line_id);
     }
+
+    /**
+      * @Author Barton
+      * @Description 查询所有线路起点坐标信息
+      * @Date 2019/4/23
+      * @Param parentid
+      * @param collectUserList
+      * @return java.util.List<java.util.Map<java.lang.String,java.lang.Object>>
+      */
+    @Override
+    public List<Map<String, Object>> queryNewSceneryTrackInfo(String parentid, List<Integer> collectUserList) {
+        return sceneryInfoMapper.queryNewSceneryTrackInfo(parentid, collectUserList);
+    }
+
+    /**
+      * @Author Barton
+      * @Description 查询线路id是否存在
+      * @Date 2019/4/23
+      * @Param id
+      * @return int
+      */
+    @Override
+    public int findIdNum(String id) {
+        return sceneryInfoMapper.findIdNum(id);
+    }
+
+    /**
+      * @Author Barton
+      * @Description 查询该条线路的坐标信息是否完整
+      * @Date 2019/4/23
+      * @Param params
+      * @return int
+      */
+    @Override
+    public int findInfoCount(Map<String, Object> params) {
+        return sceneryInfoMapper.findInfoCount(params);
+    }
+
+    /**
+      * @Author Barton
+      * @Description 新增线路百度坐标及Gps坐标
+      * @Date 2019/4/23
+      * @Param params
+      * @return int
+      */
+    @Override
+    public int addPoiInfo(Map<String, Object> params) {
+        return sceneryInfoMapper.addPoiInfo(params);
+    }
+
+    /**
+      * @Author Barton
+      * @Description 修改线路百度坐标及Gps坐标
+      * @Date 2019/4/23
+      * @Param params
+      * @return int
+      */
+    @Override
+    public int updatePoiInfo(Map<String, Object> params) {
+        return sceneryInfoMapper.updatePoiInfo(params);
+    }
+
+    /**
+      * @Author Barton
+      * @Description 查询线路百度及Gps坐标扩展表信息
+      * @Date 2019/4/24
+      * @Param
+      * @return java.util.List<java.util.Map<java.lang.String,java.lang.Object>>
+      */
+    @Override
+    public List<Map<String, Object>> queryGpsPoiTrackInfo() {
+        return sceneryInfoMapper.queryGpsPoiTrackInfo();
+    }
+
+    /**
+      * @Author Barton
+      * @Description 保存百度坐标信息到bx_commodity_poi
+      * @Date 2019/4/24
+      * @Param params
+      * @return int
+      */
+    @Override
+    public int addBdTrackPoi(Map<String, Object> params) {
+        return sceneryInfoMapper.addBdTrackPoi(params);
+    }
+
+    /**
+      * @Author Barton
+      * @Description 根据线路gps轨迹查询操作的线路的id
+      * @Date 2019/4/24
+      * @Param com_track_bd
+      * @return int
+      */
+    @Override
+    public int findLineId(String com_track_bd) {
+        return sceneryInfoMapper.findLineId(com_track_bd);
+    }
+
+    /**
+      * @Author Barton
+      * @Description 根据线路id删除拆分的线路信息
+      * @Date 2019/4/24
+      * @Param id
+      * @return int
+      */
+    @Override
+    public int delLineTrackInfo(int id) {
+        return sceneryInfoMapper.delLineTrackInfo(id);
+    }
 }

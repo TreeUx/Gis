@@ -334,9 +334,14 @@ public class SceneryInfoController {
         collectUserList.add(collect_line_id);
         // 查询
         try {
+            // 查询所有景点单元出入口信息
             List<Map<String, Object>> sceneryPartInfoList = sceneryInfoService.queryNewSceneryPartInfo(parentid,collectUserList);
+            // 查询所有线路起点坐信息
+            List<Map<String, Object>> sceneryTrackInfoList = sceneryInfoService.queryNewSceneryTrackInfo(parentid,collectUserList);
+            sceneryPartInfoList.addAll(sceneryTrackInfoList);
             result.put("msg", "出入口信息查询成功");
             result.put("status", "success");
+            //所有景点单元数据信息
             result.put("data", sceneryPartInfoList);
 
         } catch (Exception e) {
@@ -425,6 +430,183 @@ public class SceneryInfoController {
             result.put("status", "error");
             result.put("msg", "操作失败");
             logger.error("[景点线路轨迹路线信息保存异常-ErrorMsg:]", e);
+        }
+        return result;
+    }
+    /**
+     * @Author Breach
+     * @Description 保存线路id、线路的百度坐标及Gps坐标信息
+     * @Date 2019/4/23
+     * @Param request
+     * @return java.util.Map<java.lang.String,java.lang.Object>
+     */
+    @RequiresAuthentication
+    @RequestMapping("/addPoiInfo")
+    @ResponseBody
+    public Map<String, Object> addPoiInfo(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
+        String id = request.getParameter("id"); // 线路id
+        String com_track_gps = request.getParameter("com_track_gps"); // Gps坐标数组
+        params.put("id", id); //线路id
+        params.put("com_track_gps", com_track_gps); //线路的Gps坐标
+        try {
+            // 查询表中是否存在本条线路id
+            int num = sceneryInfoService.findIdNum(id);
+            // 查询表中是否存在本条线路信息
+//            int count = sceneryInfoService.findInfoCount(params);
+            if(num == 0) {
+                // 新增线路的百度坐标及Gps坐标信息
+                int res = sceneryInfoService.addPoiInfo(params);
+                result.put("msg", "保存成功");
+                result.put("status", 200);
+            } /*else if(num != 0 && count == 0) {
+                // 修改线路的百度坐标及Gps坐标信息
+                int res = sceneryInfoService.updatePoiInfo(params);
+                result.put("msg", "修改成功");
+                result.put("status", 200);
+            }*/
+
+        } catch (Exception e) {
+            result.put("status", "error");
+            result.put("msg", "操作失败");
+            logger.error("[线路坐标信息保存异常-ErrorMsg:]", e);
+        }
+        return result;
+    }
+    /**
+     * @Author Breach
+     * @Description 查询线路百度及Gps坐标扩展表信息
+     * @Date 2019/4/23
+     * @Param request
+     * @return java.util.Map<java.lang.String,java.lang.Object>
+     */
+    @RequiresAuthentication
+    @RequestMapping("/queryGpsPoiTrackInfo")
+    @ResponseBody
+    public Map<String, Object> queryGpsPoiTrackInfo() {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            // 查询线路百度及Gps坐标扩展表信息
+            List<Map<String, Object>> gpsPoiTrackInfo = sceneryInfoService.queryGpsPoiTrackInfo();
+            if(!gpsPoiTrackInfo.isEmpty()) {
+                result.put("msg", "坐标信息查询成功");
+                result.put("status", 200);
+                result.put("data", gpsPoiTrackInfo);
+            } else {
+                result.put("msg", "未查询到任何信息");
+                result.put("status", 500);
+            }
+
+
+        } catch (Exception e) {
+            result.put("status", "error");
+            result.put("msg", "操作失败");
+            logger.error("[线路坐标信息查询异常-ErrorMsg:]", e);
+        }
+        return result;
+    }
+    /**
+     * @Author Breach
+     * @Description 保存百度坐标信息到bx_commodity_poi
+     * @Date 2019/4/23
+     * @Param request
+     * @return java.util.Map<java.lang.String,java.lang.Object>
+     */
+    @RequiresAuthentication
+    @RequestMapping("/addBdTrackPoi")
+    @ResponseBody
+    public Map<String, Object> addBdTrackPoi(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
+        String id = request.getParameter("id"); // 线路id
+        String com_track_bd = request.getParameter("com_track_bd"); // 百度坐标字符串
+        params.put("id", id);
+        params.put("com_track_bd", com_track_bd);
+
+        try {
+            // 保存百度坐标信息到bx_commodity_poi
+            int num = sceneryInfoService.addBdTrackPoi(params);
+            if(num != 0) {
+                result.put("msg", "保存百度坐标信息成功");
+                result.put("status", 200);
+            } else {
+                result.put("msg", "保存百度坐标信息失败");
+                result.put("status", 500);
+            }
+
+        } catch (Exception e) {
+            result.put("status", "error");
+            result.put("msg", "操作失败");
+            logger.error("[线路坐标信息查询异常-ErrorMsg:]", e);
+        }
+        return result;
+    }
+    /**
+     * @Author Breach
+     * @Description 根据线路gps轨迹查询操作的线路的id
+     * @Date 2019/4/23
+     * @Param request
+     * @return java.util.Map<java.lang.String,java.lang.Object>
+     */
+    @RequiresAuthentication
+    @RequestMapping("/findLineId")
+    @ResponseBody
+    public Map<String, Object> findLineId(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>(16);
+        // 百度坐标字符串
+        String com_track_bd = request.getParameter("com_track_bd");
+
+        try {
+            // 根据线路gps轨迹查询操作的线路的id
+            int id = sceneryInfoService.findLineId(com_track_bd);
+            if(id != -1) {
+                result.put("msg", "查询信息成功");
+                result.put("status", 200);
+                // 线路轨迹id
+                result.put("id", id);
+            } else {
+                result.put("msg", "未查询到任何信息");
+                result.put("status", 500);
+            }
+
+        } catch (Exception e) {
+            result.put("status", "error");
+            result.put("msg", "操作失败");
+            logger.error("[线路坐标信息查询异常-ErrorMsg:]", e);
+        }
+        return result;
+    }
+    /**
+     * @Author Breach
+     * @Description 根据线路id删除拆分的线路信息
+     * @Date 2019/4/23
+     * @Param request
+     * @return java.util.Map<java.lang.String,java.lang.Object>
+     */
+    @RequiresAuthentication
+    @RequestMapping("/delLineTrackInfo")
+    @ResponseBody
+    public Map<String, Object> delLineTrackInfo(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>(16);
+        // 被拆分的线路的id
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        try {
+            // 根据线路gps轨迹查询操作的线路的id
+            int num = sceneryInfoService.delLineTrackInfo(id);
+            if(num != 0) {
+                result.put("msg", "删除拆分线路信息成功");
+                result.put("status", 200);
+            } else {
+                result.put("msg", "删除失败");
+                result.put("status", 500);
+            }
+
+        } catch (Exception e) {
+            result.put("status", "error");
+            result.put("msg", "操作失败");
+            logger.error("[线路坐标信息查询异常-ErrorMsg:]", e);
         }
         return result;
     }

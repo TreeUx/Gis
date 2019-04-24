@@ -36,4 +36,22 @@ public interface SceneryInfoService {
     List<Map<String, Object>> queryIntroduceInfo(int parentid);
 
     List<Integer> queryCollectUserInfo(int collect_line_id);
+
+    List<Map<String, Object>> queryNewSceneryTrackInfo(String parentid, List<Integer> collectUserList);
+
+    int findIdNum(String id);
+
+    int findInfoCount(Map<String, Object> params);
+
+    int addPoiInfo(Map<String, Object> params);
+
+    int updatePoiInfo(Map<String, Object> params);
+
+    List<Map<String, Object>> queryGpsPoiTrackInfo();
+
+    int addBdTrackPoi(Map<String, Object> params);
+
+    int findLineId(String com_track_bd);
+
+    int delLineTrackInfo(int id);
 }
