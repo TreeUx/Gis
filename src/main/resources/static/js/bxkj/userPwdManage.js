@@ -127,7 +127,7 @@ function updateUserPwdInfo(username, password) {
                     time = time-1000;
                     if(ss==1) {
                         clearInterval(se);
-                        location.href = "login" //跳转到登录页
+                        location.href = "/bx-gis/index.html" //跳转到登录页
                     }
                 },1000);
 

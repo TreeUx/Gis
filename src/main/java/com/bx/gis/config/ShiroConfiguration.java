@@ -107,7 +107,7 @@ public class ShiroConfiguration {
         // authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访
         filterChainDefinitionManager.put("/user/**", "authc,roles[user]");
         filterChainDefinitionManager.put("/admin/**", "authc,roles[admin]");
-        filterChainDefinitionManager.put("/login", "anon"); //登录页
+        filterChainDefinitionManager.put("/index.html", "anon"); //登录页
         filterChainDefinitionManager.put("/403", "anon");
         filterChainDefinitionManager.put("/forget", "anon"); //忘记密码
         filterChainDefinitionManager.put("/selectUserInfo", "anon"); //用户数据请求
@@ -134,9 +134,9 @@ public class ShiroConfiguration {
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionManager);
 
         // 如果不设置默认会自动寻找Web工程根目录下的"/login.html"页面
-        shiroFilterFactoryBean.setLoginUrl("/login");
+        shiroFilterFactoryBean.setLoginUrl("/index.html");
         // 登录成功后要跳转的链接
-        shiroFilterFactoryBean.setSuccessUrl("/success");
+        shiroFilterFactoryBean.setSuccessUrl("/bx-gis/success");
         // 未授权界面
         shiroFilterFactoryBean.setUnauthorizedUrl("/403");
 

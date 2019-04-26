@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${title}"></title>
+    <!--头部小图标-->
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.ico}"/>
     <style type="text/css">
         body {
-            background: url("/img/7.jpg") no-repeat;
+            background: url("/bx-gis/img/7.jpg") no-repeat;
             background-size: cover;
             animation-name: myfirst;
             animation-duration: 30s;
@@ -20,19 +22,19 @@
 
         @keyframes myfirst {
             0% {
-                background: url("/img/4.jpg") no-repeat;
+                background: url("/bx-gis/img/4.jpg") no-repeat;
                 background-size: cover;
             }
             34% {
-                background: url("/img/5.jpg") no-repeat;
+                background: url("/bx-gis/img/5.jpg") no-repeat;
                 background-size: cover;
             }
             67% {
-                background: url("/img/6.jpg") no-repeat;
+                background: url("/bx-gis/img/6.jpg") no-repeat;
                 background-size: cover;
             }
             100% {
-                background: url("/img/7.jpg") no-repeat;
+                background: url("/bx-gis/img/7.jpg") no-repeat;
                 background-size: cover;
             }
         }
@@ -199,7 +201,7 @@
                 <div class="form-group" style="width: 80%;">
                     <label class="checkbox" style="font-family:'微软雅黑';font-size:14px;color: #353434;">
                         <input id="rememberMe" type="checkbox" name="rememberMe"/>记住我
-                        <a id="forget_pwd" class="forgetpwd j-redirect" href="/forget" target="_self">忘记密码？</a>
+                        <a id="forget_pwd" class="forgetpwd j-redirect" href="/bx-gis/forget" target="_self">忘记密码？</a>
                     </label>
                 </div>
                 <div class="form-group" style="padding:20px;">

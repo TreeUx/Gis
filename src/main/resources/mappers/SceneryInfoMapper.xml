@@ -47,10 +47,10 @@
         )
     </insert>
 
-    <!-- 根据商品code查询景区商品信息 -->
+    <!-- 根据商品code查询景区商品单元信息 -->
     <select id="querySceneryInfoByCode" resultType="java.util.Map">
         SELECT
-            bc.id "id",bc.com_code "com_code",com_name,state,city,com_address,com_entrance,com_exit,com_duplex,com_begining,com_moment,com_best,com_introduce,com_level,com_img,com_central,
+            bc.id "id",bc.com_code "com_code",com_name,state,province,city,com_address,com_entrance,com_exit,com_duplex,com_begining,com_moment,com_best,com_introduce,com_level,com_img,com_central,
             epidemic,recreational,nostalgic,romantic,parent_child,naturalness,singularity,excitement,culture,ornamental,participatory,iconic,bci.id 'imgId',
 	        bci.img_url 'imgUrl'
         FROM
@@ -197,11 +197,15 @@
     <insert id="addPointlineInfos" parameterType="java.util.Map">
       INSERT INTO
         bx_commodity (
-          com_code,com_type,parentid,com_track,com_name,com_begining,com_moment,com_level,state,bx_op_deptid,collect_line_id,com_time
+          com_code,com_type,parentid,com_track,com_name,com_begining,com_moment,com_level,state
+        ,tra_id,bx_op_deptid,collect_line_id,com_time,charge_type
         ) VALUES (
           #{comCode},#{comType},#{parentid},#{transedPointStrs},#{comName},#{comBegining}
-          ,#{comMoment},#{comLevel},#{state},#{bxOpDeptid},#{collectLineId},now()
+          ,#{comMoment},#{comLevel},#{state},#{traId},#{bxOpDeptid},#{collectLineId},now(),3
         )
+        <selectKey resultType="java.lang.Integer" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
     </insert>
 
     <!--新增线路百度坐标及对应的Gps坐标信息-->

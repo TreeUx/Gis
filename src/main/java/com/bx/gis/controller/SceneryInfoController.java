@@ -299,7 +299,7 @@ public class SceneryInfoController {
         String comCode = request.getParameter("comCode");
         try {
             int num = sceneryInfoService.deleteNewSceneryInfo(comCode);
-            if (num == 2) {
+            if (num != 0) {
                 results.put("msg", "删除成功");
                 results.put("status", "success");
             } else {
@@ -396,7 +396,8 @@ public class SceneryInfoController {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         String comCode = new StringRandom().getStringRandom(8);//商品编码
         String parentid = request.getParameter("parentid"); // 父类id
-        String bxOpDeptid = request.getParameter("bxOpDeptid"); // 旅行社id
+        String traId = request.getParameter("traId"); // 旅行社id
+        String bxOpDeptid = request.getParameter("bxOpDeptid"); // 运营部id
         String collectLineId = request.getParameter("collectLineId"); // 采线员id
         String transedPointStrs = request.getParameter("transedPointStrs");
         String comName = request.getParameter("comName");
@@ -407,7 +408,8 @@ public class SceneryInfoController {
         String state = "33"; //国家
         params.put("comName", comName + "度假区LN"); //商品名称
         params.put("transedPointStrs", transedPointStrs); //轨迹
-        params.put("bxOpDeptid", bxOpDeptid); //旅行社id
+        params.put("traId", traId); //旅行社id
+        params.put("bxOpDeptid", bxOpDeptid); // 运营部id
         params.put("collectLineId", collectLineId); //采线员id
         params.put("parentid", parentid); //父类id
         params.put("comCode", comCode); //商品code
@@ -419,8 +421,11 @@ public class SceneryInfoController {
         try {
             int num = sceneryInfoService.addPointlineInfos(params);
             if (num != 0) {
+                // 新增的id
+                int id = Integer.parseInt(params.get("id")+"");
                 result.put("msg", "保存成功");
                 result.put("status", "success");
+                result.put("id", id);
                 System.out.println("(SceneryInfoController:413h) 线路信息保存成功");
             } else {
                 result.put("status", "error");

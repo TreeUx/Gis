@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${title}"></title>
+    <!--头部小图标-->
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.ico}"/>
     <style type="text/css">
         body, html {
             width: 100%;
@@ -65,11 +67,11 @@
         .i-icon {
             display: inline-block;
             background-repeat: no-repeat;
-            background-image: url(/img/bx.jpg);
+            background-image: url(/bx-gis/img/bx.jpg);
         }
 
         .g-hd .m-c .u-bc .logo.i-icon-logo-s {
-            background: url(/img/bx.jpg) no-repeat;
+            background: url(/bx-gis/img/bx.jpg) no-repeat;
             width: 124px;
             height: 60px;
             background-size: auto;
@@ -209,8 +211,8 @@
 <div class="g-hd">
     <div class="m-c">
         <div class="u-bc">
-            <a href="/login" class="logo i-icon i-icon-logo"></a>
-            <a href="/login" class="logo i-icon i-icon-logo-s"></a>
+            <a href="/bx-gis/index.html" class="logo i-icon i-icon-logo"></a>
+            <a href="/bx-gis/index.html" class="logo i-icon i-icon-logo-s"></a>
             <span class="sub-tlt">账号中心</span>
         </div>
     </div>

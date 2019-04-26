@@ -80,7 +80,7 @@ public class LoginController {
      * @Param model
      * @return java.lang.String
      */
-    @RequestMapping("/login")
+    @RequestMapping("/index.html")
     public String login(Model model) {
         System.out.println(SecurityUtils.getSubject().isRemembered());
         System.out.println(SecurityUtils.getSubject().isAuthenticated());
@@ -102,8 +102,9 @@ public class LoginController {
         model.addAttribute("op_deptid", request.getParameter("opDeptid")); //运营部id
         model.addAttribute("operate_id", request.getParameter("operateId")); //计调部操作员id
         if(request.getParameter("traId") == null || request.getParameter("opDeptid") == null
-            || request.getParameter("operateId") == null) {
-            return "login";
+            || request.getParameter("operateId") == null || request.getParameter("traId") == ""
+                || request.getParameter("opDeptid") == "" || request.getParameter("operateId") == "") {
+            return "index.html";
         }
         return "register";
     }
@@ -140,7 +141,7 @@ public class LoginController {
                     token.clear();
                     System.out.println("用户[" + user.getNickname() + "]登录认证失败,重新登陆");
 //                    return "redirect:/login";
-                    return "login";
+                    return "index.html";
                 }
             } catch (UnknownAccountException uae) {
                 logger.info("对用户[" + user.getNickname() + "]进行登录验证..验证失败-username wasn't in the system");
@@ -161,10 +162,10 @@ public class LoginController {
                 return "success";
             }else{
                 token.clear();
-                return "redirect:login";
+                return "redirect:index.html";
             }
         }
-        return "login";
+        return "index.html";
     }
 
     /**
@@ -181,6 +182,8 @@ public class LoginController {
 
             UsernamePasswordToken token = new UsernamePasswordToken(username, password);
             SecurityUtils.getSubject().login(token);
+            //设置session超时时间为1天
+            SecurityUtils.getSubject().getSession().setTimeout(86400000);
             resultMap.put("status", 200);
             resultMap.put("message", "登录成功");
 
