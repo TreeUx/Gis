@@ -85,11 +85,15 @@
     <!--删除被拆分的线路的原信息-->
     <update id="delLineTrackInfo">
       UPDATE
-        bx_commodity
+        bx_commodity t
+      LEFT JOIN
+        bx_commodity_poi t1
+      ON
+        t.id = t1.id
       SET
-        del_state = 0
+        t.del_state = 0,t1.del_state = 0
       WHERE
-        id = #{id}
+        t.id = #{id}
     </update>
     <!-- 查询修改时景点修改的名称是否已经存在 -->
     <select id="querySceneryCount" resultType="java.lang.Integer">
@@ -179,7 +183,7 @@
     </select>
 
     <!-- 查询景点下的所有路线的轨迹信息 -->
-    <select id="querySceneryTrackInfos" resultType="java.util.Map">
+    <!--<select id="querySceneryTrackInfos" resultType="java.util.Map">
       SELECT
         id,
         parentid,
@@ -191,6 +195,20 @@
         parentid = #{parentid}
         AND del_state = 1
         AND com_track is not null
+    </select>-->
+    <!-- 查询景点下的所有路线的轨迹信息 -->
+    <select id="querySceneryTrackInfos" resultType="java.util.Map">
+      SELECT
+        id,
+        com_track_bd,
+        commodity_id,
+        com_track_gps
+      FROM
+        bx_commodity_poi
+      WHERE
+        commodity_id = #{parentid}
+        AND del_state = 1
+        AND com_track_bd is not null
     </select>
 
     <!--保存转换后的景点线路坐标信息-->
@@ -212,31 +230,21 @@
     <insert id="addPoiInfo">
       INSERT INTO
         bx_commodity_poi (
-        id,com_track_gps
+        id,com_track_bd,com_track_gps,commodity_id
         ) VALUES (
-        #{id},#{com_track_gps}
+        #{id},#{com_track_bd},#{com_track_gps},#{commodity_id}
         )
     </insert>
 
     <!--保存百度坐标信息到bx_commodity_poi-->
-    <insert id="addBdTrackPoi">
+    <!--<insert id="addBdTrackPoi">
         UPDATE
           bx_commodity_poi
         SET
           com_track_bd = #{com_track_bd}
         WHERE
           id = #{id}
-    </insert>
-
-    <!--修改线路百度坐标及对应的Gps坐标信息-->
-    <update id="updatePoiInfo">
-      UPDATE
-        bx_commodity_poi
-      SET
-        com_track_bd = CONCAT(com_track_bd, #{com_track_bd})
-      WHERE
-        id = #{id}
-    </update>
+    </insert>-->
 
     <!--校验用户名和密码-->
     <select id="checkPsw" resultType="java.lang.Integer">

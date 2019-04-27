@@ -452,9 +452,13 @@ public class SceneryInfoController {
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> params = new HashMap<>();
         String id = request.getParameter("id"); // 线路id
+        String com_track_bd = request.getParameter("com_track_bd"); // bd坐标数组
         String com_track_gps = request.getParameter("com_track_gps"); // Gps坐标数组
+        String commodity_id = request.getParameter("commodity_id"); // 景区id
         params.put("id", id); //线路id
+        params.put("com_track_bd", com_track_bd); //线路的bd坐标
         params.put("com_track_gps", com_track_gps); //线路的Gps坐标
+        params.put("commodity_id", commodity_id); //景区id
         try {
             // 查询表中是否存在本条线路id
             int num = sceneryInfoService.findIdNum(id);
@@ -465,12 +469,7 @@ public class SceneryInfoController {
                 int res = sceneryInfoService.addPoiInfo(params);
                 result.put("msg", "保存成功");
                 result.put("status", 200);
-            } /*else if(num != 0 && count == 0) {
-                // 修改线路的百度坐标及Gps坐标信息
-                int res = sceneryInfoService.updatePoiInfo(params);
-                result.put("msg", "修改成功");
-                result.put("status", 200);
-            }*/
+            }
 
         } catch (Exception e) {
             result.put("status", "error");
@@ -627,7 +626,7 @@ public class SceneryInfoController {
     @ResponseBody
     @RequiresAuthentication
     public Map<String, Object> querySceneryTrackInfos(HttpServletRequest request) {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = new HashMap<>(16);
         String parentid = request.getParameter("parentid");
         try {
             List<Map<String, Object>> trackInfoList = sceneryInfoService.querySceneryTrackInfos(parentid);
@@ -635,10 +634,7 @@ public class SceneryInfoController {
                 result.put("msg", "线路轨迹路线信息查询成功");
                 result.put("status", "success");
                 result.put("data", trackInfoList);
-            } /*else {
-                result.put("status", "error");
-                result.put("msg", "线路轨迹路线信息查询失败");
-            }*/
+            }
         } catch (Exception e) {
             result.put("status", "error");
             result.put("msg", "操作失败");

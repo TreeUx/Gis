@@ -15,8 +15,8 @@ var x_PI = 3.14159265358979324 * 3000.0 / 180.0;
 var PI = 3.1415926535897932384626;
 var a = 6378245.0;
 var ee = 0.00669342162296594323;
-// var requesturl = "https://www.ai-peer.com/" //前缀(prod)
-var requesturl = "http://118.89.49.148/" //前缀(test)
+var requesturl = "https://www.ai-peer.com/" //前缀(prod)
+// var requesturl = "http://118.89.49.148/" //前缀(test)
 var fea; // 特色资源
 /*坐标转换需要的常量 End*/
 var addLineClick; //鼠标点击事件
@@ -31,6 +31,9 @@ var click_line_poi = {} // 采集线路时，点击折线处的坐标点数据
 var line_poi_arrs = new Array() // 存放拆分的全部线路的点数组
 var operate_line_id; // 操作的线路的全局id
 var tempBl = true // 点击折线时的控制开关
+var pointsTemp1 = new Array() //超过十个点的存放集合
+var clickPolyline; // 点击的折线覆盖物对象
+var flag_index = 0; // 保存分割路线开关变量
 $(function () {
     // 整个页面所有的右击事件
     document.oncontextmenu = function () {
@@ -446,9 +449,9 @@ function transToGps(sectionPointList, splitLineBl) { //pointList转换前的坐�
     var transedPointStrs = "" //transedPointStrs转换坐标后的字符串
     var pointArr = new Array()
     var index = 0
+    var convertor = new BMap.Convertor();
     for (var i = 0; i < sectionPointList.length; i++) {
         // var tempPoint = {}
-        var convertor = new BMap.Convertor()
         var x1 = sectionPointList[i].lng
         var y1 = sectionPointList[i].lat
         pointArr.push(sectionPointList[i]);
@@ -494,57 +497,56 @@ function transToGps(sectionPointList, splitLineBl) { //pointList转换前的坐�
             }
         })
     } else {
-        var math = parseInt(len / 10)
         var index1 = 0
-        var index2 = 0
-        var pointLists = new Array()
-        for (var m = 0; m < math + 1; m++) {
-            // setTimeout(function () { //定时器
-            translateCallback = function (data) { //百度坐标系转换为原始坐标系（回调函数）
-                if (data.status === 0) {
-                    for (var t = 0; t < data.points.length; t++) {
-                        var x2 = data.points[t].lng //百度经度
-                        var y2 = data.points[t].lat //百度纬度
-                        var tempPoint = gcj02towgs84(x2, y2) //百度坐标系转换大地坐标系
-                        var x = tempPoint.lng //大地坐标系经度
-                        var y = tempPoint.lat //大地坐标系纬度
-                        transedPointStrs = transedPointStrs + (x.toFixed(10) + "," + y.toFixed(10) + " ")  //拼接转换后的大地(Gps)坐标
-                    }
-                    index2++
-                    if (index2 == (math + 1)) { //保存线路点信息
-                        // console.log(transedPointStrs)
-                        var end_pointbl = false //判断最后的坐标点是否是出入口坐标
-                        for (let i = 0; i < enterAndExitArr.length; i++) {
-                            let end_point = sectionPointList[sectionPointList.length - 1] //采集线路的最后一个点坐标
-                            if (end_point.equals(enterAndExitArr[i])) {
-                                end_pointbl = true
-                            }
-                        }
-                        if (!end_pointbl) { // splitLineBl：判断是否是保存拆分的线路
-                            if (splitLineBl) { // 若是保存拆分线路的前半部分，则允许保存
-                                //保存采集后的线路数据
-                                addPointlineInfos(transedPointStrs, sectionPointList)
-                            } else {
-                                alert("终点必须是出入口坐标!")
-                            }
-                        } else {
-                            addPointlineInfos(transedPointStrs, sectionPointList) //保存采集后的线路数据
-                            // transedPointStrs = "" //重置
-                            index2 = 0
-                        }
+        addExchangeLinePoi(index1, pointArr, transedPointStrs, sectionPointList, convertor)
+    }
+}
+
+// 当采集的点数超过10个时，分批进行转换拼接保存
+function addExchangeLinePoi(index1, pointArr, transedPointStrs, sectionPointList, convertor) {
+    convertor.translate(pointArr.slice(index1 * 10 == 0 ? index1 * 10 : index1 * 10 - 1, index1 * 10 + 9), 5, 3, function (res) {
+        if (res.status === 0) {
+            var points = res.points
+            for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
+                var x2 = points[j].lng //百度经度
+                var y2 = points[j].lat //百度纬度
+                var tempPoint = gcj02towgs84(x2, y2) //百度坐标系转换大地坐标系
+                var x = tempPoint.lng //大地坐标系经度
+                var y = tempPoint.lat //大地坐标系纬度
+                transedPointStrs = transedPointStrs + (x.toFixed(10) + "," + y.toFixed(10) + " ")  //拼接转换后的大地(Gps)坐标
+            }
+            index1++
+            if (parseInt(pointArr.length / 10) + 1 > index1) {
+                addExchangeLinePoi(index1, pointArr, transedPointStrs, sectionPointList, convertor)
+            } else {
+                var end_pointbl = false //判断最后的坐标点是否是出入口坐标
+                for (let i = 0; i < enterAndExitArr.length; i++) {
+                    let end_point = sectionPointList[sectionPointList.length - 1] //采集线路的最后一个点坐标
+                    if (end_point.equals(enterAndExitArr[i])) {
+                        end_pointbl = true
                     }
                 }
+                if (!end_pointbl) { // splitLineBl：判断是否是保存拆分的线路
+                    if (splitLineBl) { // 若是保存拆分线路的前半部分，则允许保存
+                        //保存采集后的线路数据
+                        addPointlineInfos(transedPointStrs, sectionPointList)
+                        setTimeout(function () {
+                            clickPolyline.enableMassClear() // 设置被拆分的折线叠加层允许被清除
+                            map.clearOverlays() // 清除折线叠加层
+                        }, 1000)
+                    } else {
+                        alert("终点必须是出入口坐标!")
+                    }
+                } else {
+                    addPointlineInfos(transedPointStrs, sectionPointList) //保存采集后的线路数据
+                    // transedPointStrs = "" //重置
+                    index1 = 0
+                }
             }
-            // },1)
-
-            pointLists = pointArr.slice(index1 * 10, index1 * 10 + 10) //存放一组10个坐标
-            index1++
-            convertor.translate(pointLists, 5, 3, translateCallback) //百度坐标系转换为原始坐标系
-
         }
-    }
-
+    })
 }
+
 
 /*百度转GPS坐标修正 End*/
 
@@ -903,7 +905,6 @@ function querySceneryEntranceInfos(map, scenery_name) {
                         locaArray.push(entrance)
                         locaArray.push(exit)
                         locaArray.push(duplex)
-                        // map.addEventListener('tilesloaded', querySceneryTrackInfos) //当地图所有图块完成加载时触发此事件
                         parentid = data.parentid //景点id
                         showEntranceMarkImg(map, locaArray, parentid) //展示景点出入口标记及景点内所有单元标记
                         querySceneryTrackInfos(map, parentid, scenery_name) //查询景点内所有路线信息
@@ -1338,133 +1339,31 @@ function querySceneryTrackInfos(map, parentid, scenery_name) {
             success: function (data) {
                 if (data.status == "success") {
                     data = $.parseJSON(JSON.stringify(data)).data
-                    // console.log("景区内线路坐标集合 Start")
-                    // console.log(data)
-                    // console.log("景区内线路坐标集合 End")
                     var convertor = new BMap.Convertor();
-                    // var id_arr = new Array() // 存放线路id的数组
-                    // var bd_poistr = "" // 存放线路百度坐标的字符串
-                    // var bd_poiarr = new Array() // 存放线路百度坐标的数组
-                    // var gps_poiarr = new Array() // 存放线路原始gps坐标的数组
                     for (var i = 0; i < data.length; i++) {
                         var id = data[i].id // 单个线路id
-                        addPoiInfo(id, data[i].com_track) // 添加Gps坐标及线路I到bx_commodity_poi
-                        // id_arr.push(id)
-                        var locas = ""
-                        if (data[i].com_track != "" && data[i].com_track != undefined) {
-                            // 存放每条线路的原始坐标
-                            // gps_poiarr.push(data[i].com_track)
-                            locas = data[i].com_track.split(" ")
+                        var pointsTemp = new Array()
+                        var pointsTemp1 = new Array()
+                        pointsTemp = data[i].com_track_bd.split(" ")
+                        for (let j = 0; j < pointsTemp.length - 1; j++) {
+                            pointsTemp1.push(new BMap.Point(pointsTemp[j].substring(0, pointsTemp[j].indexOf(","))
+                                , pointsTemp[j].substring(pointsTemp[j].indexOf(",") + 1, pointsTemp[j].length)))
                         }
-                        if (locas != "" && locas != null) {
-                            // var pointList = new Array()
-                            var pointArr = new Array();
-                            for (var j = 0; j < locas.length; j++) {
-                                var location = locas[j]
-                                if (location != "" && location != null) {
-                                    var lng = location.substring(0, location.indexOf(","))
-                                    var lat = location.substring(location.indexOf(",") + 1, location.length)
-                                    var point = new BMap.Point(lng, lat)
-                                    pointArr.push(point);
-                                }
-                            }
-                            /*原始坐标转换为百度坐标 Start*/
-                            if (pointArr.length <= 10) {
-                                convertor.translate(pointArr, 1, 5, function (res) {
-                                    var pointsTemp = new Array()
-                                    if (res.status === 0) {
-                                        var points = res.points
-                                        // console.log(points)
-                                        for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                            pointsTemp.push(new BMap.Point(points[j].lng.toFixed(6), points[j].lat.toFixed(6)))
-                                            // 拼接转换为的百度坐标
-                                            // bd_poistr += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6)) + " "
-                                            // 将拼接后的百度坐标字符串存入数组中
-                                            // bd_poiarr.push(bd_poistr)
-                                        }
-
-                                        // console.log(pointsTemp)
-                                        var polyline = new BMap.Polyline(
-                                            pointsTemp       //标注点坐标集合
-                                            , {
-                                                strokeColor: "#22F719",
-                                                strokeOpacity: 1,
-                                                strokeWeight: '6',//折线的宽度，以像素为单位
-                                                strokeStyle: "solid", //设置是为实线或虚线，solid或dashed
-                                                enableEditing: false  //是否启用线编辑，默认为false
-                                            });//创建折线
-                                        polyline.disableMassClear()//设置不允许覆盖物在map.clearOverlays方法中被清除
-                                        polyline.addEventListener("mouseover", mouseoverLine); // 为折线添加移入事件
-                                        polyline.addEventListener("mouseout", mouseoutLine); // 为折线添加移出事件
-                                        polyline.addEventListener("click", clickLine); // 为折线添加点击事件
-                                        map.addOverlay(polyline);//添加标注连线
-                                    }
-                                })
-                            } else { //当一条线路中的点大于10时，需要进行点切分进行坐标系转换（convertor.translate()一次只能转换10个坐标点）
-                                var math = parseInt(pointArr.length / 10)
-                                /*if (pointArr.length % 10 != 0) {
-                                    math = math + 1
-                                }*/
-                                var pointLists = new Array()
-                                var pointList1 = new Array()
-                                for (var m = 0; m < math + 1; m++) { //循环切分为10个点进行坐标转换
-                                    pointLists = pointArr.slice(m * 10, m * 10 + 10)
-                                    pointList1 = pointArr.slice(m * 10 - 1, m * 10 + 9) //此处为了设置线路闭合使用
-                                    var pointsTemp = new Array()
-                                    var pointsTemp1 = new Array()
-                                    convertor.translate(pointLists, 1, 5, function (res) {
-                                        var points = res.points
-                                        for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                            pointsTemp.push(new BMap.Point(points[j].lng.toFixed(6), points[j].lat.toFixed(6)))
-
-                                        }
-                                        var polyline = new BMap.Polyline(
-                                            pointsTemp       //标注点坐标集合
-                                            , {
-                                                strokeColor: "#22F719",
-                                                strokeOpacity: 1,
-                                                strokeWeight: '6',//折线的宽度，以像素为单位
-                                                strokeStyle: "solid", //设置是为实线或虚线，solid或dashed
-                                                enableEditing: false  //是否启用线编辑，默认为false
-                                            });//创建折线
-                                        polyline.disableMassClear()//设置不允许覆盖物在map.clearOverlays方法中被清除
-                                        polyline.addEventListener("mouseover", mouseoverLine); // 为折线添加移入事件
-                                        polyline.addEventListener("mouseout", mouseoutLine); // 为折线添加移出事件
-                                        polyline.addEventListener("click", clickLine); // 为折线添加点击事件
-                                        map.addOverlay(polyline);//添加标注连线
-                                    })
-                                    convertor.translate(pointList1, 1, 5, function (res) {
-                                        var points = res.points
-                                        for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                            pointsTemp1.push(new BMap.Point(points[j].lng.toFixed(6), points[j].lat.toFixed(6)))
-
-                                        }
-                                        var polyline = new BMap.Polyline(
-                                            pointsTemp1       //标注点坐标集合
-                                            , {
-                                                strokeColor: "#22F719",
-                                                strokeOpacity: 1,
-                                                strokeWeight: '6',//折线的宽度，以像素为单位
-                                                strokeStyle: "solid", //设置是为实线或虚线，solid或dashed
-                                                enableEditing: false  //是否启用线编辑，默认为false
-                                            });//创建折线
-                                        polyline.disableMassClear()//设置不允许覆盖物在map.clearOverlays方法中被清除
-                                        polyline.addEventListener("mouseover", mouseoverLine); // 为折线添加移入事件
-                                        polyline.addEventListener("mouseout", mouseoutLine); // 为折线添加移出事件
-                                        polyline.addEventListener("click", clickLine); // 为折线添加点击事件
-                                        map.addOverlay(polyline);//添加标注连线
-                                    })
-                                }
-                            }
-                            /*原始坐标转换为百度坐标 End*/
-                        } else {
-                            continue
-                        }
+                        var polyline = new BMap.Polyline(
+                            pointsTemp1       //标注点坐标集合
+                            , {
+                                strokeColor: "#22F719",
+                                strokeOpacity: 1,
+                                strokeWeight: '6',//折线的宽度，以像素为单位
+                                strokeStyle: "solid", //设置是为实线或虚线，solid或dashed
+                                enableEditing: false  //是否启用线编辑，默认为false
+                            });//创建折线
+                        polyline.disableMassClear()//设置不允许覆盖物在map.clearOverlays方法中被清除
+                        polyline.addEventListener("mouseover", mouseoverLine); // 为折线添加移入事件
+                        polyline.addEventListener("mouseout", mouseoutLine); // 为折线添加移出事件
+                        polyline.addEventListener("click", clickLine); // 为折线添加点击事件
+                        map.addOverlay(polyline);//添加标注连线
                     }
-                    // 添加转换后的百度坐标
-                    setTimeout(function () {
-                        queryGpsPoiTrackInfo()
-                    }, 2000)
                 } else {
                     map.centerAndZoom(scenery_name, 16);//初始化地图，设置地图级别
                 }
@@ -1476,205 +1375,17 @@ function querySceneryTrackInfos(map, parentid, scenery_name) {
     }
 }
 
-// 查询线路百度及Gps坐标扩展表信息
-function queryGpsPoiTrackInfo() {
-    $.ajax({
-        url: "queryGpsPoiTrackInfo",
-        type: "post",
-        datatype: "json",
-        success: function (data) {
-            if (data.status == 200) {
-                var convertor = new BMap.Convertor();
-                data = $.parseJSON(JSON.stringify(data)).data
-                var pointArr = new Array();
-                var id = data[0].id // 线路id
-                var locas = data[0].com_track_gps.split(" ") //线路轨迹坐标
-                for (var j = 0; j < locas.length; j++) {
-                    var location = locas[j]
-                    if (location != "" && location != null) {
-                        var lng = location.substring(0, location.indexOf(","))
-                        var lat = location.substring(location.indexOf(",") + 1, location.length)
-                        var point = new BMap.Point(lng, lat)
-                        pointArr.push(point);
-                    }
-                }
-                /*原始坐标转换为百度坐标 Start*/
-                if (pointArr.length <= 10) {
-                    var com_track_bd = "" // 转换成的百度坐标的拼接字符串
-                    convertor.translate(pointArr, 1, 5, function (res) {
-                        if (res.status === 0) {
-                            var points = res.points
-                            for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                com_track_bd += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6)) + " "
-                            }
-                            // 保存转换后的百度坐标
-                            addBdTrackPoi(id, com_track_bd)
-                        }
-                    })
-                } else { //当一条线路中的点大于10时，需要进行点切分进行坐标系转换（convertor.translate()一次只能转换10个坐标点）
-                    var math = pointArr.length
-                    var pointLists = new Array()
-                    var com_track_bd = "" // 转换成的百度坐标的拼接字符串
-                    pointLists = pointArr.slice(0, 10)
-                    convertor.translate(pointLists, 1, 5, function (res) {
-                        if (res.status === 0) {
-                            var points = res.points
-                            for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                com_track_bd += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6)) + " "
-                            }
-                            if(math - 10 >= 0) {
-                                var pointList1 = new Array()
-                                pointList1 = pointArr.slice(10, 20) //此处为了设置线路闭合使用
-                                convertor.translate(pointList1, 1, 5, function (res1) {
-                                    if (res1.status === 0) {
-                                        var points = res1.points
-                                        for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                            com_track_bd += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6)) + " "
-                                        }
-                                        if(math - 19 > 0) {
-                                            var pointList2 = new Array()
-                                            pointList2 = pointArr.slice(19, 29) //此处为了设置线路闭合使用
-                                            convertor.translate(pointList2, 1, 5, function (res2) {
-                                                if (res2.status === 0) {
-                                                    var points = res2.points
-                                                    for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                                        com_track_bd += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6)) + " "
-                                                    }
-                                                    if(math - 29 > 0) {
-                                                        var pointList3 = new Array()
-                                                        pointList3 = pointArr.slice(29, 39) //此处为了设置线路闭合使用
-                                                        convertor.translate(pointList3, 1, 5, function (res3) {
-                                                            if (res3.status === 0) {
-                                                                var points = res3.points
-                                                                for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                                                    com_track_bd += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6)) + " "
-                                                                }
-                                                                if(math - 39 > 0) {
-                                                                    var pointList4 = new Array()
-                                                                    pointList4 = pointArr.slice(39, 49) //此处为了设置线路闭合使用
-                                                                    convertor.translate(pointList4, 1, 5, function (res4) {
-                                                                        if (res4.status === 0) {
-                                                                            var points = res4.points
-                                                                            for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                                                                com_track_bd += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6)) + " "
-                                                                            }
-                                                                            if(math - 49 > 0) {
-                                                                                var pointList5 = new Array()
-                                                                                pointList5 = pointArr.slice(49, 59) //此处为了设置线路闭合使用
-                                                                                convertor.translate(pointList5, 1, 5, function (res5) {
-                                                                                    if (res5.status === 0) {
-                                                                                        var points = res5.points
-                                                                                        for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                                                                            com_track_bd += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6)) + " "
-                                                                                        }
-                                                                                        if(math - 59 > 0) {
-                                                                                            var pointList6 = new Array()
-                                                                                            pointList6 = pointArr.slice(59, 69) //此处为了设置线路闭合使用
-                                                                                            convertor.translate(pointList6, 1, 5, function (res6) {
-                                                                                                if (res6.status === 0) {
-                                                                                                    var points = res6.points
-                                                                                                    for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                                                                                        com_track_bd += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6)) + " "
-                                                                                                    }
-                                                                                                    if(math - 69 > 0) {
-                                                                                                        var pointList7 = new Array()
-                                                                                                        pointList7 = pointArr.slice(69, 79) //此处为了设置线路闭合使用
-                                                                                                        convertor.translate(pointList7, 1, 5, function (res7) {
-                                                                                                            if (res7.status === 0) {
-                                                                                                                var points = res7.points
-                                                                                                                for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                                                                                                    com_track_bd += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6)) + " "
-                                                                                                                }
-                                                                                                                // 保存转换后的百度坐标
-                                                                                                                addBdTrackPoi(id, com_track_bd)
-                                                                                                            }
-                                                                                                        })
-                                                                                                    } else {
-                                                                                                        // 保存转换后的百度坐标
-                                                                                                        addBdTrackPoi(id, com_track_bd)
-                                                                                                    }
-                                                                                                }
-                                                                                            })
-                                                                                        } else {
-                                                                                            // 保存转换后的百度坐标
-                                                                                            addBdTrackPoi(id, com_track_bd)
-                                                                                        }
-                                                                                    }
-                                                                                })
-                                                                            } else {
-                                                                                // 保存转换后的百度坐标
-                                                                                addBdTrackPoi(id, com_track_bd)
-                                                                            }
-                                                                        }
-                                                                    })
-                                                                } else {
-                                                                    // 保存转换后的百度坐标
-                                                                    addBdTrackPoi(id, com_track_bd)
-                                                                }
-                                                            }
-                                                        })
-                                                    } else {
-                                                        // 保存转换后的百度坐标
-                                                        addBdTrackPoi(id, com_track_bd)
-                                                    }
-                                                }
-                                            })
-                                        } else {
-                                            // 保存转换后的百度坐标
-                                            addBdTrackPoi(id, com_track_bd)
-                                        }
-                                    }
-                                })
-                            } else {
-                                // 保存转换后的百度坐标
-                                addBdTrackPoi(id, com_track_bd)
-                            }
-                        }
-                    })
-                }
-            } else {
-                return
-            }
-        },
-        error: function (e) {
-            showSuccessOrErrorModal("网络异常！", "error");
-        }
-    })
-}
-
-// 保存百度坐标信息到bx_commodity_poi
-function addBdTrackPoi(id, com_track_bd) {
-    $.ajax({
-        url: "addBdTrackPoi",
-        type: "post",
-        data: {
-            "id": id,
-            "com_track_bd": com_track_bd
-        },
-        datatype: "json",
-        success: function (data) {
-            if (data.status == 200) {
-                // 此处继续调用保存百度坐标函数
-                queryGpsPoiTrackInfo()
-            } else {
-                return
-            }
-        },
-        error: function (e) {
-            showSuccessOrErrorModal("网络异常！", "error");
-        }
-    })
-}
-
 /**
  * 将线路的gps坐标及展示后转换的百度坐标保存到bx_commodity_poi表中
  */
-function addPoiInfo(id, com_track_gps) {
+function addPoiInfo(new_line_id, parentid, bdPoiStrs, transedPointStrs) {
     $.ajax({
         url: "addPoiInfo",
         data: {
-            "id": id,
-            "com_track_gps": com_track_gps
+            "id": new_line_id,
+            "com_track_bd": bdPoiStrs,
+            "com_track_gps": transedPointStrs,
+            "commodity_id": parentid
         },
         type: "get",
         dataType: "json",
@@ -2144,15 +1855,15 @@ function addNewSceneryInfos(map, lng, lat, title, data, marker) {
                     '<option value="' + GlobalCity[0].child[1].child[i].id + '">' + GlobalCity[0].child[1].child[i].value + '</option>'
                 );
             }
-            if(state != "") {
+            if (state != "") {
                 $("#continents").val(state); //初始化国家下拉选
                 queryProvinceInfo()
             }
-            if(province != "") {
+            if (province != "") {
                 $("#state").val(province); //初始化省份下拉选
                 queryCityInfo()
             }
-            if(city != "") {
+            if (city != "") {
                 $("#city").val(city); //初始化城市下拉选
             }
 
@@ -2468,7 +2179,7 @@ function saveNewSceneryInfo(e) {
         "bxcommodity": bxcommodity,
         "cfeature": fea
     }
-    if(parentid != -1) {
+    if (parentid != -1) {
         // console.log(JSON.stringify(pro_req))
         $.ajax({
             // url: "addNewSceneryInfo",
@@ -2827,59 +2538,14 @@ function mouseup(event) {
 function endDraw(map, sectionPointList) {//map当前的图层
     map.clearOverlays() //清除所有覆盖物
     printPointline(map, sectionPointList) //绘制线
+    flag_index = 0;
     console.log("完成绘制函数")
-}
-
-/**
- * 计算一个点是否在多边形里
- * @param {Object} pt 标注点
- * @param {Object} poly 多边形数组
- */
-function isInsidePolygon(pt, poly) {
-    for (var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i)
-        ((poly[i].lat <= pt.lat && pt.lat < poly[j].lat) || (poly[j].lat <= pt.lat && pt.lat < poly[i].lat)) &&
-        (pt.lng < (poly[j].lng - poly[i].lng) * (pt.lat - poly[i].lat) / (poly[j].lat - poly[i].lat) + poly[i].lng) &&
-        (c = !c);
-    return c;
 }
 
 //绘制线
 function printPointline(map, sectionPointList) {
-    /*var polyline = new BMap.Polyline(
-        sectionPointList       //标注点坐标集合
-        , {
-            strokeColor: "#01f700",
-            enableClicking: true,//是否响应点击事件，默认为true
-            strokeOpacity: 1,
-            strokeWeight: '6',//折线的宽度，以像素为单位
-            strokeStyle: "solid", //设置是为实线或虚线，solid或dashed
-            enableEditing: false  //是否启用线编辑，默认为false
-        });//创建折线
-
-    polyline.disableMassClear()//设置不允许覆盖物在map.clearOverlays方法中被清除
-    polyline.addEventListener("mouseover", mouseoverLine); // 为折线添加移入事件
-    polyline.addEventListener("mouseout", mouseoutLine); // 为折线添加移出事件
-    polyline.addEventListener("click", clickLine); // 为折线添加点击事件
-    map.addOverlay(polyline);//添加标注连线*/
-    /*转换坐标 Start*/
     transToGps(sectionPointList)
     /*转换坐标 End*/
-    // 判断起始点是否为已知线路的中间任意一点
-    if (pointList[0].equals(new BMap.Point(click_line_poi.lng, click_line_poi.lat))) {
-        // console.log("保存拆分后的线路，并进行线绘制")
-        for (let i = 0; i < line_poi_arrs.length; i++) {
-            splitLineBl = true
-            transToGps(line_poi_arrs[i], splitLineBl) //绘制线
-        }
-        // 清除已删除的线路线段
-        map.clearOverlays()
-        // 删除操作的被拆分的原线路信息
-        delLineTrackInfo()
-    }
-    // setTimeout(function () {
-    //     pointList.length = 0 //清空坐标点集合
-    //     pointS.length = 0
-    // }, 100)
 }
 
 /*为折线添加的事件 Start*/
@@ -2908,6 +2574,7 @@ function clickLine(e) {
     var lng = e.point.lng;
     var lat = e.point.lat;
     var p = e.target;
+    clickPolyline = p; // 获取点击的线路的对象
     var line_track = "" // 线路Gps坐标轨迹
 
     if (pointList[0] == undefined) { // 判断第一次点击折线上的点
@@ -2929,8 +2596,7 @@ function clickLine(e) {
                 , new BMap.Point(p.getPath()[i].lng, p.getPath()[i].lat))).toFixed(0) //算出距离
             var distance1 = (map.getDistance(new BMap.Point(click_line_poi.lng, click_line_poi.lat)
                 , new BMap.Point(p.getPath()[i + 1].lng, p.getPath()[i + 1].lat))).toFixed(0) //算出下一个点距离
-            // console.log(distance + "," + distance1)
-            // console.log(parseInt(distance) + parseInt(distance1))
+
             if (parseInt(distance_arr[i]) == (parseInt(distance) + parseInt(distance1))// 判断点击折线处的点到该折线上每个点的距离之后与每两个临近点之间的距离进行比较
                 || parseInt(distance_arr[i]) == (parseInt(distance) + parseInt(distance1) + 1)
                 || (distance_arr[i] + 1) == (parseInt(distance) + parseInt(distance1))) {
@@ -2955,22 +2621,20 @@ function clickLine(e) {
                         }
                     }
                 }
-                // console.log(line_poi_arrs)
                 break
             }
         }
+        console.log(line_track)
         // 查询操作的该条线路轨迹的id
         findLineId(line_track)
     } else {
         // console.log("点击的折线不是作为起始点")
-        // console.log(pointList[0].equals(new BMap.Point(click_line_poi.lng, click_line_poi.lat)))
         return
     }
-
-    // console.log(distance_arr)
     // console.log(p.getPath()) // 获取折线上点的所有点坐标集合
     // console.log("鼠标点击了折线")
 }
+
 // 根据线路gps轨迹查询操作的线路的id
 function findLineId(com_track_bd) {
     $.ajax({
@@ -2995,17 +2659,21 @@ function findLineId(com_track_bd) {
         }
     });
 }
+
 // 根据线路id删除拆分的线路信息
 function delLineTrackInfo() {
     $.ajax({
         url: "delLineTrackInfo",
-        type: "post",
+        type: "get",
         data: {
             "id": operate_line_id //线路轨迹id
         },
         dataType: "json",
         success: function (data) {
             if (data.status == 200) {
+                pointList.length = 0  //清空以保存的线路点坐标数组
+                transedPointStrs = "" //重置转换后的点数组
+                bdPoiStrs = "" // 重置转换后的百度坐标数据
                 // console.log("删除拆分的线路")
             } else {
                 // showSuccessOrErrorModal(data.msg, "error");
@@ -3036,7 +2704,8 @@ function addPointlineInfos(transedPointStrs, sectionPointList) {
         dataType: "json",
         success: function (data) {
             if (data.status == "success") {
-
+                // 新保存的采集线路的Id
+                var new_line_id = data.id
                 /*采用此种标点无误差*/
                 var convertor = new BMap.Convertor();
                 var locas1 = transedPointStrs.split(" ")
@@ -3052,6 +2721,8 @@ function addPointlineInfos(transedPointStrs, sectionPointList) {
                 }
                 /*原始坐标转换为百度坐标 Start*/
                 if (pointArr.length <= 10) {
+                    // 要保存的拼接的百度坐标字符串
+                    var bdPoiStrs = ""
                     convertor.translate(pointArr, 1, 5, function (res) {
                         var pointsTemp = new Array()
                         if (res.status === 0) {
@@ -3059,15 +2730,10 @@ function addPointlineInfos(transedPointStrs, sectionPointList) {
                             // console.log(points)
                             for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
                                 pointsTemp.push(new BMap.Point(points[j].lng.toFixed(6), points[j].lat.toFixed(6)))
-                                // 拼接转换为的百度坐标
-                                // bd_poistr += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6)) + " "
-                                // 将拼接后的百度坐标字符串存入数组中
-                                // bd_poiarr.push(bd_poistr)
+                                bdPoiStrs += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6) + " ")
                             }
-
-                            // console.log(pointsTemp)
                             var polyline = new BMap.Polyline(
-                                pointsTemp       //标注点坐标集合
+                                pointsTemp       //标注点坐标集合(百度坐标)
                                 , {
                                     strokeColor: "#22F719",
                                     strokeOpacity: 1,
@@ -3075,86 +2741,50 @@ function addPointlineInfos(transedPointStrs, sectionPointList) {
                                     strokeStyle: "solid", //设置是为实线或虚线，solid或dashed
                                     enableEditing: false  //是否启用线编辑，默认为false
                                 });//创建折线
-                            polyline.enableMassClear()//设置允许覆盖物在map.clearOverlays方法中被清除
+                            polyline.disableMassClear()//设置允许覆盖物在map.clearOverlays方法中被清除
                             polyline.addEventListener("mouseover", mouseoverLine); // 为折线添加移入事件
                             polyline.addEventListener("mouseout", mouseoutLine); // 为折线添加移出事件
                             polyline.addEventListener("click", clickLine); // 为折线添加点击事件
                             map.addOverlay(polyline);//添加标注连线
+                            // 添加线路id、百度坐标及Gps坐标到扩展表中(new_line_id:新增线路Id,parentid:景区Id, pointsTemp：转换为的百度坐标, transedPointStrs: Gps坐标)
+                            addPoiInfo(new_line_id, parentid, bdPoiStrs, transedPointStrs);
                         }
                     })
                 } else { //当一条线路中的点大于10时，需要进行点切分进行坐标系转换（convertor.translate()一次只能转换10个坐标点）
-                    var math = parseInt(pointArr.length / 10)
-                    /*if (pointArr.length % 10 != 0) {
-                        math = math + 1
-                    }*/
-                    var pointLists = new Array()
-                    var pointList1 = new Array()
-                    for (var m = 0; m < math + 1; m++) { //循环切分为10个点进行坐标转换
-                        pointLists = pointArr.slice(m * 10, m * 10 + 10)
-                        pointList1 = pointArr.slice(m * 10 - 1, m * 10 + 9) //此处为了设置线路闭合使用
-                        var pointsTemp = new Array()
-                        var pointsTemp1 = new Array()
-                        convertor.translate(pointLists, 1, 5, function (res) {
-                            var points = res.points
-                            for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                pointsTemp.push(new BMap.Point(points[j].lng.toFixed(6), points[j].lat.toFixed(6)))
+                    pointsTemp1 = new Array()
+                    // 要保存的拼接的百度坐标字符串
+                    var bdPoiStrs = ""
+                    var index = 0
+                    // 展示原始坐标转换为百度坐标后的线路
+                    showLineInfo(new_line_id, parentid, transedPointStrs, bdPoiStrs, index, pointArr, convertor)
 
-                            }
-                            var polyline = new BMap.Polyline(
-                                pointsTemp       //标注点坐标集合
-                                , {
-                                    strokeColor: "#22F719",
-                                    strokeOpacity: 1,
-                                    strokeWeight: '6',//折线的宽度，以像素为单位
-                                    strokeStyle: "solid", //设置是为实线或虚线，solid或dashed
-                                    enableEditing: false  //是否启用线编辑，默认为false
-                                });//创建折线
-                            polyline.enableMassClear()//设置允许覆盖物在map.clearOverlays方法中被清除
-                            polyline.addEventListener("mouseover", mouseoverLine); // 为折线添加移入事件
-                            polyline.addEventListener("mouseout", mouseoutLine); // 为折线添加移出事件
-                            polyline.addEventListener("click", clickLine); // 为折线添加点击事件
-                            map.addOverlay(polyline);//添加标注连线
-                        })
-                        convertor.translate(pointList1, 1, 5, function (res) {
-                            var points = res.points
-                            for (let j = 0; j < points.length; j++) { // 将转换后的百度坐标保存小数点后6位
-                                pointsTemp1.push(new BMap.Point(points[j].lng.toFixed(6), points[j].lat.toFixed(6)))
-
-                            }
-                            var polyline = new BMap.Polyline(
-                                pointsTemp1       //标注点坐标集合
-                                , {
-                                    strokeColor: "#22F719",
-                                    strokeOpacity: 1,
-                                    strokeWeight: '6',//折线的宽度，以像素为单位
-                                    strokeStyle: "solid", //设置是为实线或虚线，solid或dashed
-                                    enableEditing: false  //是否启用线编辑，默认为false
-                                });//创建折线
-                            polyline.disableMassClear()//设置不允许覆盖物在map.clearOverlays方法中被清除
-                            polyline.addEventListener("mouseover", mouseoverLine); // 为折线添加移入事件
-                            polyline.addEventListener("mouseout", mouseoutLine); // 为折线添加移出事件
-                            polyline.addEventListener("click", clickLine); // 为折线添加点击事件
-                            map.addOverlay(polyline);//添加标注连线
-                        })
+                }
+                // 判断起始点是否为已知线路的中间任意一点
+                if (pointList.length != 0) {
+                    if (pointList[0].equals(new BMap.Point(click_line_poi.lng, click_line_poi.lat)) && flag_index < line_poi_arrs.length) {
+                        // console.log("保存拆分后的线路，并进行线绘制")
+                        for (flag_index; flag_index < line_poi_arrs.length; flag_index++) {
+                            splitLineBl = true
+                            transToGps(line_poi_arrs[flag_index], splitLineBl) //绘制线
+                        }
+                        // 清除已删除的线路线段
+                        map.clearOverlays()
+                        // 删除操作的被拆分的原线路信息
+                        if (flag_index == line_poi_arrs.length) {
+                            delLineTrackInfo()
+                        }
                     }
                 }
                 /*原始坐标转换为百度坐标 End*/
 
-                var id = data.id
-                // 添加新增线路的gps坐标及id到拓展表中
-                addPoiInfo(id,transedPointStrs)
                 clickOnLineBl = false // 关闭判断是否点击在折线上开关
-                // 保存新增的线路百度及Gps坐标数据
-                setTimeout(function () {
-                    // 添加百度坐标到拓展表
-                    queryGpsPoiTrackInfo()
-                }, 1000)
+
                 if (pointList[pointList.length - 1] == sectionPointList[sectionPointList.length - 1]) {
-                    pointList.length = 0  //清空以保存的线路点坐标数组
-                    // pointList = new Array() //清空以保存的线路坐标数组
-                    transedPointStrs = "" //重置转换后的点数组
-                    // console.log("保存线路坐标后，采集的坐标数组数据重置")
-                    // showSuccessOrErrorModal(data.msg, "success");
+                    if (!pointList[0].equals(new BMap.Point(click_line_poi.lng, click_line_poi.lat))) {
+                        pointList.length = 0  //清空以保存的线路点坐标数组
+                        transedPointStrs = "" //重置转换后的点数组
+                        bdPoiStrs = "" // 重置转换后的百度坐标数据
+                    }
                 }
                 line_poi_arrs.length = 0 // 重置拆分的线路坐标数据信息
             } else {
@@ -3167,23 +2797,57 @@ function addPointlineInfos(transedPointStrs, sectionPointList) {
     });
 }
 
-//绘制景区线路线
-function printSceneryPointline(map, pointList) {
-    var polyline = new BMap.Polyline(
-        pointList       //标注点坐标集合
-        , {
-            strokeColor: "#22F719",
-            strokeOpacity: 1,
-            strokeWeight: '6',//折线的宽度，以像素为单位
-            strokeStyle: "solid", //设置是为实线或虚线，solid或dashed
-            enableEditing: false  //是否启用线编辑，默认为false
-        });//创建折线
-    polyline.disableMassClear()//设置不允许覆盖物在map.clearOverlays方法中被清除
-    polyline.addEventListener("mouseover", mouseoverLine); // 为折线添加移入事件
-    polyline.addEventListener("mouseout", mouseoutLine); // 为折线添加移出事件
-    polyline.addEventListener("click", clickLine); // 为折线添加点击事件
-    map.addOverlay(polyline);//添加标注连线
+// 当采集的点数超过10个时，分批进行转换展示
+function showLineInfo(new_line_id, parentid, transedPointStrs, bdPoiStrs, index, pointArr, convertor) {
+    convertor.translate(pointArr.slice(index * 10 == 0 ? index * 10 : index * 10 - 1, index * 10 + 9), 1, 5, function (res) {
+        if (res.status === 0) {
+            var points = res.points
+            for (let j = 0; j < points.length; j++) { // 将转换为的百度坐标保存小数点后6位
+                pointsTemp1.push(new BMap.Point(points[j].lng.toFixed(6), points[j].lat.toFixed(6)))
+                bdPoiStrs += (points[j].lng.toFixed(6) + "," + points[j].lat.toFixed(6) + " ")
+            }
+            index++
+            if (parseInt(pointArr.length / 10) + 1 > index) {
+                showLineInfo(new_line_id, parentid, transedPointStrs, bdPoiStrs, index, pointArr, convertor)
+            } else {
+                var polyline = new BMap.Polyline(
+                    pointsTemp1       //标注点坐标集合
+                    , {
+                        strokeColor: "#22F719",
+                        strokeOpacity: 1,
+                        strokeWeight: '6',//折线的宽度，以像素为单位
+                        strokeStyle: "solid", //设置是为实线或虚线，solid或dashed
+                        enableEditing: false  //是否启用线编辑，默认为false
+                    });//创建折线
+                polyline.disableMassClear()//设置不允许覆盖物在map.clearOverlays方法中被清除
+                polyline.addEventListener("mouseover", mouseoverLine); // 为折线添加移入事件
+                polyline.addEventListener("mouseout", mouseoutLine); // 为折线添加移出事件
+                polyline.addEventListener("click", clickLine); // 为折线添加点击事件
+                map.addOverlay(polyline);//添加标注连线
+                // 添加线路id、百度坐标及Gps坐标到扩展表中(new_line_id:新增线路Id,parentid:景区Id, bdPoiStrs：转换为的百度坐标拼接后的字符串, transedPointStrs: Gps坐标)
+                addPoiInfo(new_line_id, parentid, bdPoiStrs, transedPointStrs);
+            }
+        }
+    })
 }
+
+//绘制景区线路线
+// function printSceneryPointline(map, pointList) {
+//     var polyline = new BMap.Polyline(
+//         pointList       //标注点坐标集合
+//         , {
+//             strokeColor: "#22F719",
+//             strokeOpacity: 1,
+//             strokeWeight: '6',//折线的宽度，以像素为单位
+//             strokeStyle: "solid", //设置是为实线或虚线，solid或dashed
+//             enableEditing: false  //是否启用线编辑，默认为false
+//         });//创建折线
+//     polyline.disableMassClear()//设置不允许覆盖物在map.clearOverlays方法中被清除
+//     polyline.addEventListener("mouseover", mouseoverLine); // 为折线添加移入事件
+//     polyline.addEventListener("mouseout", mouseoutLine); // 为折线添加移出事件
+//     polyline.addEventListener("click", clickLine); // 为折线添加点击事件
+//     map.addOverlay(polyline);//添加标注连线
+// }
 
 //取消绘制
 function cancelDraw(map, pointList) {
